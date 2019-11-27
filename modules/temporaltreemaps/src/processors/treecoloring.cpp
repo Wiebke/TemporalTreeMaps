@@ -90,7 +90,7 @@ TemporalTreeColoring::TemporalTreeColoring()
     propColorBrewerScheme.addOption("pastel2", "Pastel2 [3,8]", colorbrewer::Family::Pastel2);
     propColorBrewerScheme.addOption("set1", "Set1 [3,9]", colorbrewer::Family::Set1);
     propColorBrewerScheme.addOption("set2", "Set2 [3,8]", colorbrewer::Family::Set2);
-    propColorBrewerScheme.addOption("set1", "Set3 [3,12]", colorbrewer::Family::Set3);
+    propColorBrewerScheme.addOption("set3", "Set3 [3,12]", colorbrewer::Family::Set3);
 
     propColorSpace.addOption("sampleHSV", "HSV", 0);
     propColorSpace.addOption("sampleTransfer", "Color Map", 1);
@@ -209,7 +209,7 @@ void TemporalTreeColoring::process()
         {
             LogProcessorError("The Color Brewer Family " << 
                 propColorBrewerScheme.getSelectedDisplayName() <<
-                "does not work for number of leaves: " << numLeaves << ".");
+                " does not work for number of leaves: " << numLeaves << ".");
             return;
         }
         colorMap = colorbrewer::getColormap(propColorBrewerScheme, (glm::uint8) leaves.size());
@@ -276,7 +276,7 @@ void TemporalTreeColoring::process()
             {
                 LogProcessorError("The Color Brewer Family " <<
                     propColorBrewerScheme.getSelectedDisplayName() <<
-                    "does not work for nodes in first level: " << numFirstLevel << ".");
+                    " does not work for nodes in first level: " << numFirstLevel << ".");
                 return;
             }
             auto colorBrewerMap = colorbrewer::getColormap(propColorBrewerScheme, (glm::uint8) numFirstLevel);

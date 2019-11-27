@@ -419,7 +419,7 @@ std::shared_ptr<TemporalTree> TemporalTreeJSONReaderNTG::readData(const std::str
 
             //Get the value, which is a json object containing time step (t), data (w), and other unused info
             const json& jValue = it.value();
-            const uint64_t Time = (jValue.find("t") != jValue.cend()) ? jValue["t"] : 0;
+            const uint64_t Time = (jValue.find("t") != jValue.cend()) ? jValue["t"] : json(0);
             const float DataValue = (jValue.find("w") != jValue.cend()) ? jValue["w"] : 0;
             ThisNode.values.emplace(Time, DataValue);
 

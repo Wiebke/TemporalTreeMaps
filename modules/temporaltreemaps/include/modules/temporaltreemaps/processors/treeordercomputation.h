@@ -23,7 +23,7 @@
 #include <modules/temporaltreemaps/datastructures/treeport.h>
 #include <modules/temporaltreemaps/datastructures/constraint.h>
 #include <modules/tools/performancetimer.h>
-#include <modules/plotting/datastructures/dataframe.h>
+#include <inviwo/dataframe/datastructures/dataframe.h>
 #include <random>
 
 namespace inviwo
@@ -134,10 +134,10 @@ public:
     TemporalTreeOutport portOutTree;
 
     ///Optimization LogFile
-    plot::DataFrameOutport portOutLogOptimization;
+    DataFrameOutport portOutLogOptimization;
 
     ///Settings LogFile
-    plot::DataFrameOutport portOutLogSettings;
+    DataFrameOutport portOutLogSettings;
 
 //Properties
 public:
@@ -311,10 +311,10 @@ protected:
     OptimizationState bestState;
 
     ///Collect some statisics during the optimization run
-    std::shared_ptr<plot::DataFrame> optimizationStatistics;
+    std::shared_ptr<DataFrame> optimizationStatistics;
 
     ///Collect some statisics during the optimization run
-    std::shared_ptr<plot::DataFrame> optimizationSettings;
+    std::shared_ptr<DataFrame> optimizationSettings;
 
 	///Prefix for the type of optimization
     std::string logPrefix;

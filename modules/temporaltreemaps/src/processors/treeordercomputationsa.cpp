@@ -154,7 +154,7 @@ void TemporalTreeSimulatedAnnealing::logProperties()
         std::to_string(propTimeUntilBest),
         std::to_string(propTimeForLastAction) };
 
-    optimizationSettings = plot::createDataFrame({ exampleRow }, colHeaders);
+    optimizationSettings = createDataFrame({ exampleRow }, colHeaders);
     optimizationSettings->addRow(exampleRow);
 }
 
@@ -184,7 +184,7 @@ void TemporalTreeSimulatedAnnealing::initializeLog()
         std::to_string(numConstraintsHierarchy),
         std::to_string(currentState.statistic.unhappyLeaves.size())};
 
-    optimizationStatistics = plot::createDataFrame({ exampleRow }, colHeaders);
+    optimizationStatistics = createDataFrame({ exampleRow }, colHeaders);
 }
 
 void TemporalTreeSimulatedAnnealing::logStep()

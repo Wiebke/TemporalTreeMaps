@@ -594,7 +594,7 @@ void TemporalTreeOrderOptimization::initializeLog()
         std::to_string(numConstraintsHierarchy),
         std::to_string(currentState.statistic.unhappyLeaves.size()) };
 
-    optimizationStatistics = plot::createDataFrame({ exampleRow }, colHeaders);
+    optimizationStatistics = createDataFrame({ exampleRow }, colHeaders);
 }
 
 void TemporalTreeOrderOptimization::setFileNames()

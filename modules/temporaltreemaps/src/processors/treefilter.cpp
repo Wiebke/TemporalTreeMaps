@@ -72,6 +72,8 @@ TemporalTreeFilter::TemporalTreeFilter()
         propStartLifespan.setMinValue(tMin);
         propStartLifespan.set(tMin);
         propFilterDepth.setMaxValue(pInTree->getNumLevels(0));
+        propDoFilter.propertyModified();
+        propDoFilterFirstLevel.propertyModified();
     });
 
     addProperty(propFilter);
@@ -125,7 +127,7 @@ TemporalTreeFilter::TemporalTreeFilter()
                     }
                 }
                 auto bp = new BoolProperty("prop" + std::to_string(nodeIndex),
-                    pInTree->nodes[nodeIndex].name + " - " + std::to_string(int(maxValue)), maxValue < 0.01 * maxValueTree);
+                    pInTree->nodes[nodeIndex].name + " - " + std::to_string(int(maxValue)), maxValue < 0.015 * maxValueTree);
                 propFilterFirstLevelNodes.addProperty(*bp);
             }
         } else

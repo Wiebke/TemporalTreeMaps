@@ -46,8 +46,6 @@ TemporalTreeGenerateFromCSV::TemporalTreeGenerateFromCSV()
     //addProperty();
 }
 
-using namespace plot;
-
 void TemporalTreeGenerateFromCSV::process()
 {
     auto hierarchy = inHierarchy.getData();
@@ -61,10 +59,10 @@ void TemporalTreeGenerateFromCSV::process()
         LogProcessorError("Not enough columns for a tree dataset in hierarchy.");
     }
     // Column 0 is an index column that gets created on reading in the data
-    std::shared_ptr<const plot::Column> columnLevel = hierarchy->getColumn(1);
-    std::shared_ptr<const plot::Column> columnName = hierarchy->getColumn(2);
-    std::shared_ptr<const plot::Column> columnStartTime = hierarchy->getColumn(3);
-    std::shared_ptr<const plot::Column> columnEndTime = hierarchy->getColumn(4);
+    std::shared_ptr<const Column> columnLevel = hierarchy->getColumn(1);
+    std::shared_ptr<const Column> columnName = hierarchy->getColumn(2);
+    std::shared_ptr<const Column> columnStartTime = hierarchy->getColumn(3);
+    std::shared_ptr<const Column> columnEndTime = hierarchy->getColumn(4);
 
     std::shared_ptr<TemporalTree> tree = std::make_shared<TemporalTree>(TemporalTree());
 

@@ -249,14 +249,10 @@ std::shared_ptr<Volume> AmiraMeshVolumeReader::readData(const std::string& fileP
     glm::vec3 offset(xmin, ymin, zmin);
 
     //Create volume and fill in data
-    auto volume = std::make_shared<Volume>();
+    auto volume = std::make_shared<Volume>(dimensions_, format_);
     // - bbox
     volume->setBasis(basis);
     volume->setOffset(offset);
-    // - dimensions
-    volume->setDimensions(dimensions_);
-    // - format
-    volume->setDataFormat(format_);
     // - representation. A RAM representation since the data is already in memory.
     auto volRAM = createVolumeRAM(dimensions_, format_, pData);
     volume->addRepresentation(volRAM);

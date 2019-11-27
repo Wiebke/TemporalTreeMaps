@@ -509,12 +509,10 @@ std::shared_ptr<Volume> TemporalTreeGenerateFromTrackingGraph::CreateOrReuseResu
 {
     if (!pOutExampleVolume)
     {
-        pOutExampleVolume = std::make_shared<Volume>();
+        pOutExampleVolume = std::make_shared<Volume>(pInVolume->getDimensions(),
+                                 DataFormatBase::get(DataFormatId::Vec3UInt8));
         if (!pOutExampleVolume) return pOutExampleVolume;
     }
-
-    //Data format
-    pOutExampleVolume->setDataFormat(DataFormatBase::get(DataFormatId::Vec3UInt8));
 
     //Dimension
     if (pOutExampleVolume->getDimensions() != pInVolume->getDimensions())

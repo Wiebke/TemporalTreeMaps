@@ -421,7 +421,7 @@ void TemporalTreeOrderComputationHeuristic::logProperties()
         std::to_string(propTimeUntilBest),
         std::to_string(propTimeForLastAction) };
 
-    optimizationSettings = plot::createDataFrame({ exampleRow }, colHeaders);
+    optimizationSettings = createDataFrame({ exampleRow }, colHeaders);
     optimizationSettings->addRow(exampleRow);
 }
 

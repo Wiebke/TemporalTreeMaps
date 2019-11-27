@@ -95,17 +95,17 @@ public:
     IntSizeTProperty propDeltaTFade;
 
     CompositeProperty propFilter;
-	BoolProperty propDoFilter;
+    BoolProperty propDoFilter;
 
     IntSizeTProperty propMinLifespan;
 
     BoolProperty propDoFilterTimeSpan;
-	IntSizeTProperty propStartLifespan;
+    IntSizeTProperty propStartLifespan;
     IntSizeTProperty propEndLifespan;
     
     IntSizeTProperty propFilterDepth;
 
-	BoolProperty propDoFilterFirstLevel;
+    BoolProperty propDoFilterFirstLevel;
     CompositeProperty propFilterFirstLevelNodes;
 
     BoolProperty propDoSplitLeaves;
