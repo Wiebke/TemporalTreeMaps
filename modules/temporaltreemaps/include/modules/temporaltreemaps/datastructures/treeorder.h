@@ -14,35 +14,36 @@
 #include <inviwo/core/common/inviwo.h>
 #include <modules/temporaltreemaps/datastructures/tree.h>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
-namespace treeorder
-{
-    /// Use the indices of the tree as the order directly
-    void orderAsInserted(TemporalTree::TTreeOrder& order, const TemporalTree& tree);
+namespace treeorder {
+/// Use the indices of the tree as the order directly
+void orderAsInserted(TemporalTree::TTreeOrder& order, const TemporalTree& tree);
 
-    /// Traverse the given tree depth first according to the 
-    /// given edges (might not be the temporal or hierarchical edges of that tree)
-    void orderAsDepthFirst(TemporalTree::TTreeOrder& order, const TemporalTree& tree, const TemporalTree::TAdjacency& edges);
+/// Traverse the given tree depth first according to the
+/// given edges (might not be the temporal or hierarchical edges of that tree)
+void orderAsDepthFirst(TemporalTree::TTreeOrder& order, const TemporalTree& tree,
+                       const TemporalTree::TAdjacency& edges);
 
-    /// Checks if the order contains every leaf
-    bool fitsWithTree(const TemporalTree& tree, const TemporalTree::TTreeOrder& leafOrder);
+/// Checks if the order contains every leaf
+bool fitsWithTree(const TemporalTree& tree, const TemporalTree::TTreeOrder& leafOrder);
 
-    /// Sorts a vector of nodes by the given order map
-    void sortNodesByOrder(const TemporalTree::TTreeOrderMap& order, const TemporalTree& tree, std::vector<size_t>& nodeIndices);
+/// Sorts a vector of nodes by the given order map
+void sortNodesByOrder(const TemporalTree::TTreeOrderMap& order, const TemporalTree& tree,
+                      std::vector<size_t>& nodeIndices);
 
-    TemporalTree::TTreeOrderMap expandToFullTree(const TemporalTree& tree, const TemporalTree::TTreeOrderMap& leafOrder);
+TemporalTree::TTreeOrderMap expandToFullTree(const TemporalTree& tree,
+                                             const TemporalTree::TTreeOrderMap& leafOrder);
 
-    void toSimpleOrder(TemporalTree::TTreeOrder& order, const TemporalTree::TTreeOrderMap& orderMap);
+void toSimpleOrder(TemporalTree::TTreeOrder& order, const TemporalTree::TTreeOrderMap& orderMap);
 
-    void toOrderMap(TemporalTree::TTreeOrderMap& orderMap, const TemporalTree::TTreeOrder& order);
+void toOrderMap(TemporalTree::TTreeOrderMap& orderMap, const TemporalTree::TTreeOrder& order);
 
-    size_t setToMinInChildren(const size_t nodeIndex, const TemporalTree& tree, TemporalTree::TTreeOrderMap& orderMap);
+size_t setToMinInChildren(const size_t nodeIndex, const TemporalTree& tree,
+                          TemporalTree::TTreeOrderMap& orderMap);
 
-} 
+}  // namespace treeorder
 
-} // namespace kth
-} // namespace
+}  // namespace kth
+}  // namespace inviwo

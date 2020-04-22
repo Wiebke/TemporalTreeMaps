@@ -27,84 +27,78 @@
 #include <inviwo/core/properties/stringproperty.h>
 //#include <inviwo/core/properties/transferfunctionproperty.h>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
 /** \docpage{org.inviwo.TemporalTreeLayoutComputation, Tree Layout Computation}
     ![](org.inviwo.TemporalTreeLayoutComputation.png?classIdentifier=org.inviwo.TemporalTreeLayoutComputation)
 
     Explanation of how to use the processor.
-    
+
     ### Inports
       * __<Inport1>__ <description>.
-    
+
     ### Outports
       * __<Outport1>__ <description>.
-    
+
     ### Properties
       * __<Prop1>__ <description>.
       * __<Prop2>__ <description>
 */
 
-
 /** \class TemporalTreeLayoutComputation
     \brief VERY_BRIEFLY_DESCRIBE_THE_PROCESSOR
-    
+
     DESCRIBE_THE_PROCESSOR_FROM_A_DEVELOPER_PERSPECTIVE
 
     @author Tino Weinkauf and Wiebke Koepp
 */
-class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeLayoutComputation : public Processor
-{ 
-//Friends
-//Types
+class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeLayoutComputation : public Processor {
+    // Friends
+    // Types
 public:
-
-//Construction / Deconstruction
+    // Construction / Deconstruction
 public:
     TemporalTreeLayoutComputation();
     virtual ~TemporalTreeLayoutComputation() = default;
 
-//Methods
+    // Methods
 public:
     virtual const ProcessorInfo getProcessorInfo() const override;
     static const ProcessorInfo processorInfo_;
 
 protected:
-    ///Our main computation function
+    /// Our main computation function
     virtual void process() override;
 
-    ///Normalize a given value according to the given value map
-    float normalValue(TemporalTree::TValueMap mapForNormalization, uint64_t time, float value) const;
+    /// Normalize a given value according to the given value map
+    float normalValue(TemporalTree::TValueMap mapForNormalization, uint64_t time,
+                      float value) const;
 
-    ///Add the normalized given values to the drawing limit
+    /// Add the normalized given values to the drawing limit
     void updateUpper(TemporalTree::TDrawingLimitMap& upperCurrent, TemporalTree::TValueMap& values,
-        TemporalTree::TValueMap& mapForNormalization);
+                     TemporalTree::TValueMap& mapForNormalization);
 
-    ///Spread the upper and lower limit towars the root 
+    /// Spread the upper and lower limit towars the root
     ///(For each node recursively visit all parents for the time frame in which they are the parent)
-    void traverseToRootForLimits(TemporalTree& tree, size_t nodeIndex, 
-        uint64_t startTime, uint64_t endTime);
+    void traverseToRootForLimits(TemporalTree& tree, size_t nodeIndex, uint64_t startTime,
+                                 uint64_t endTime);
 
-    ///Copy a drawing limit for a given time frame
-    void copyLimitInBetween(TemporalTree::TDrawingLimitMap& upperCurrent, 
-        TemporalTree::TDrawingLimitMap& limitToFill, 
-        uint64_t startTime, uint64_t endTime);
+    /// Copy a drawing limit for a given time frame
+    void copyLimitInBetween(TemporalTree::TDrawingLimitMap& upperCurrent,
+                            TemporalTree::TDrawingLimitMap& limitToFill, uint64_t startTime,
+                            uint64_t endTime);
 
-
-//Ports
+    // Ports
 public:
-    ///Input tree
+    /// Input tree
     TemporalTreeInport portInTree;
 
-    ///Tree with computed upper and lower drawing limits
+    /// Tree with computed upper and lower drawing limits
     TemporalTreeOutport portOutTree;
 
-//Properties
+    // Properties
 public:
-
     BoolProperty propSpaceFilling;
 
     FloatProperty propMaximum;
@@ -115,10 +109,9 @@ public:
     DoubleMinMaxProperty propTimeMinMax;
     DoubleMinMaxProperty propValueMinMax;
 
-
-//Attributes
+    // Attributes
 private:
 };
 
-} // namespace kth
-} // namespace
+}  // namespace kth
+}  // namespace inviwo

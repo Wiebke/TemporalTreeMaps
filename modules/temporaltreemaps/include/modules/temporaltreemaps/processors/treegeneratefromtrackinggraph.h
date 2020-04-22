@@ -29,55 +29,45 @@
 
 #include <modules/temporaltreemaps/datastructures/treeport.h>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
 /** \docpage{org.inviwo.TemporalTreeGenerateFromTrackingGraph, Tree Generate From Tracking Graph}
     ![](org.inviwo.TemporalTreeGenerateFromTrackingGraph.png?classIdentifier=org.inviwo.TemporalTreeGenerateFromTrackingGraph)
 
     Explanation of how to use the processor.
-    
+
     ### Inports
       * __<Inport1>__ <description>.
-    
+
     ### Outports
       * __<Outport1>__ <description>.
-    
+
     ### Properties
       * __<Prop1>__ <description>.
       * __<Prop2>__ <description>
 */
 
-
 /** \class TemporalTreeGenerateFromTrackingGraph
     \brief Generates a temporal tree by tracking sublevelsets in time-dependent scalar fields.
-    
+
     Bears similarity to Nested Tracking Graphs.
 
     @author Tino Weinkauf and Wiebke Koepp
 */
-class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeGenerateFromTrackingGraph : public Processor
-{ 
-//Friends
-//Types
+class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeGenerateFromTrackingGraph : public Processor {
+    // Friends
+    // Types
 public:
-    ///Relations used for predicates
-    enum RELATION
-    {
-        SMALLER,
-        SMALLEREQUAL,
-        GREATEREQUAL,
-        GREATER
-    };
+    /// Relations used for predicates
+    enum RELATION { SMALLER, SMALLEREQUAL, GREATEREQUAL, GREATER };
 
-//Construction / Deconstruction
+    // Construction / Deconstruction
 public:
     TemporalTreeGenerateFromTrackingGraph();
     virtual ~TemporalTreeGenerateFromTrackingGraph() = default;
 
-//Methods
+    // Methods
 public:
     virtual const ProcessorInfo getProcessorInfo() const override;
     static const ProcessorInfo processorInfo_;
@@ -85,76 +75,77 @@ public:
     void GenerateNestedTrackingGraphs();
 
 protected:
-    ///Our main computation function
+    /// Our main computation function
     virtual void process() override;
 
-    ///Updates the min/max range of all isovalue sliders according to CurrentValueRange
+    /// Updates the min/max range of all isovalue sliders according to CurrentValueRange
     void UpdateMinMaxAllSliders();
 
-    ///Updates the min/max range of the given isovalue slider according to CurrentValueRange
+    /// Updates the min/max range of the given isovalue slider according to CurrentValueRange
     void UpdateMinMaxSlider(DoubleProperty& Slider);
 
-    ///Returns a pointer to the output example field
+    /// Returns a pointer to the output example field
     std::shared_ptr<Volume> CreateOrReuseResultVolume(std::shared_ptr<Volume> pInVolume);
 
-    ///Returns a pointer to the output tree
+    /// Returns a pointer to the output tree
     std::shared_ptr<TemporalTree> CreateOrReuseResultTree();
 
-    ///Fills given array with isovalues from the properties in a sorted manner.
+    /// Fills given array with isovalues from the properties in a sorted manner.
     void GetIsovaluesSorted(std::vector<double>& Isovalues);
 
-//Ports
+    // Ports
 public:
-    ///The time-dependent scalar field
+    /// The time-dependent scalar field
     VolumeSeriesInport portSeries;
 
-    ///The output tree
+    /// The output tree
     TemporalTreeOutport portOutTree;
 
-    ///An example segmentation output for a selected time step
+    /// An example segmentation output for a selected time step
     VolumeOutport portOutSegmentationExample;
 
-//Properties
+    // Properties
 public:
-    ///Selection of the example time step
+    /// Selection of the example time step
     IntSizeTProperty propTimeStepExample;
 
-    ///Colormap for the example
+    /// Colormap for the example
     TransferFunctionProperty propColormap;
 
-    ///How to compare against the isovalues
+    /// How to compare against the isovalues
     TemplateOptionProperty<RELATION> propRelation;
 
-    ///Group of isovalues
+    /// Group of isovalues
     CompositeProperty propHierarchyLevelGroup;
 
-    ///Number of isovalues
+    /// Number of isovalues
     IntSizeTProperty propNumLevels;
 
-    ///Whether to create ghost children
+    /// Whether to create ghost children
     BoolCompositeProperty propGhostChildrenCreate;
 
-    ///Whether ghost children mirror their parent's tracks or not (connected in time like their parents.)
+    /// Whether ghost children mirror their parent's tracks or not (connected in time like their
+    /// parents.)
     BoolProperty propGhostChildrenTrackLikeParents;
 
-    ///Whether to run in parallel or not
+    /// Whether to run in parallel or not
     BoolProperty propParallel;
 
-    ///Since scanning is expensive,
-    ///we scan only on explicit user demand, namely when pressing this button.
+    /// Since scanning is expensive,
+    /// we scan only on explicit user demand, namely when pressing this button.
     ButtonProperty propAction;
 
-//Attributes
+    // Attributes
 private:
-    ///Cached value range of the input data used in several places for UI settings and coloring
+    /// Cached value range of the input data used in several places for UI settings and coloring
     dvec2 CurrentValueRange;
 
-    ///The output example field
+    /// The output example field
     std::shared_ptr<Volume> pOutExampleVolume;
 
-    ///The output tree
+    /// The output tree
     std::shared_ptr<TemporalTree> pOutTree;
 };
 
-} // namespace kth
-} // namespace
+}  // namespace kth
+}  // namespace inviwo

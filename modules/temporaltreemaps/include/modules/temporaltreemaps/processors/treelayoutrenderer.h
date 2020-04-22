@@ -22,46 +22,40 @@
 #include <modules/plotting/properties/axisproperty.h>
 #include <modules/plottinggl/utils/axisrenderer.h>
 
-
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
 /** \docpage{org.inviwo.TemporalTreeLayoutRenderer, Tree Layout Renderer}
     ![](org.inviwo.TemporalTreeLayoutRenderer.png?classIdentifier=org.inviwo.TemporalTreeLayoutRenderer)
 
     Explanation of how to use the processor.
-    
+
     ### Inports
       * __<Inport1>__ <description>.
-    
+
     ### Outports
       * __<Outport1>__ <description>.
-    
+
     ### Properties
       * __<Prop1>__ <description>.
       * __<Prop2>__ <description>
 */
-
 
 /** \class TemporalTreeLayoutRenderer
     \brief Render cushion trees and their borders
 
     @author Tino Weinkauf and Wiebke Koepp
 */
-class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeLayoutRenderer : public Processor
-{ 
-// Friends
-// Types
+class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeLayoutRenderer : public Processor {
+    // Friends
+    // Types
 public:
-
-// Construction / Deconstruction
+    // Construction / Deconstruction
 public:
     TemporalTreeLayoutRenderer();
     virtual ~TemporalTreeLayoutRenderer() = default;
 
-// Methods
+    // Methods
 public:
     virtual const ProcessorInfo getProcessorInfo() const override;
     static const ProcessorInfo processorInfo_;
@@ -69,11 +63,10 @@ public:
     void updateMeshs();
 
 protected:
-
     /// Our main computation function
     virtual void process() override;
 
-//Ports
+    // Ports
 public:
     /// Bands input mesh
     MeshInport portInMeshBands;
@@ -86,9 +79,8 @@ public:
 
     /// Later: Do the mesh rendering directly here
     ImageOutport portOutImage;
-// Properties
+    // Properties
 public:
-
     /// Corner positions
     FloatProperty top, bottom, left, right;
 
@@ -97,7 +89,7 @@ public:
 
     BoolProperty propInterpretAsCoefficients;
 
-    FloatVec4Property propAmbientLight; 
+    FloatVec4Property propAmbientLight;
     FloatVec4Property propDiffuseLight;
 
     CompositeProperty propAxes;
@@ -108,22 +100,20 @@ public:
     plot::AxisProperty propYAxis;
     FloatProperty propYMargin;
 
-
-// Attributes
+    // Attributes
 protected:
-	/// Custom tree shader
-	Shader bandShader;
+    /// Custom tree shader
+    Shader bandShader;
 
-	/// Custom band shader
-	Shader lineShader;
+    /// Custom band shader
+    Shader lineShader;
 
-	/// The two meshes to be drawn
-	std::unique_ptr<MeshDrawer> bandMesh, lineMesh;
+    /// The two meshes to be drawn
+    std::unique_ptr<MeshDrawer> bandMesh, lineMesh;
 
-	/// Renderers for the two axis
+    /// Renderers for the two axis
     std::array<plot::AxisRenderer, 2> axisRenderers;
-
 };
 
-} // namespace kth
-} // namespace
+}  // namespace kth
+}  // namespace inviwo

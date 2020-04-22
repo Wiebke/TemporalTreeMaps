@@ -11,62 +11,49 @@
 #include <modules/temporaltreemaps/datastructures/treecolor.h>
 #include <inviwo/core/util/colorconversion.h>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
-void treecolor::spreadColorOverTree(const TemporalTree::TAdjacency& edges, TemporalTree& tree, 
-    const size_t nodeIndex,
-    const float rangeStart, const float rangeEnd, 
-    bool alternate, uint8_t depth, const int colorFrom, const int colorTo)
-{
+void treecolor::spreadColorOverTree(const TemporalTree::TAdjacency& edges, TemporalTree& tree,
+                                    const size_t nodeIndex, const float rangeStart,
+                                    const float rangeEnd, bool alternate, uint8_t depth,
+                                    const int colorFrom, const int colorTo) {
     tree.nodes[nodeIndex].color = color::hsv2rgb(vec3((rangeStart + rangeEnd) / 2.0, 1.0, 1.0));
 
     const auto itHierarchyEdges = edges.find(nodeIndex);
 
     int sign = (rangeEnd - rangeStart < 0) ? -1 : ((rangeEnd - rangeStart > 0) ? 1 : 0);
 
-    if (depth < colorFrom || (colorTo != -1 && depth +1 > colorTo))
-    {
+    if (depth < colorFrom || (colorTo != -1 && depth + 1 > colorTo)) {
         alternate = false;
     }
 
-    //not a leaf -> process children?
-    if (itHierarchyEdges != edges.end())
-    {
+    // not a leaf -> process children?
+    if (itHierarchyEdges != edges.end()) {
         float rangeStartChild = rangeStart;
 
         auto& children = itHierarchyEdges->second;
         float fractionPerChild = std::fabs(rangeStart - rangeEnd) / children.size();
 
-        if (depth < colorFrom || (colorTo != -1 && depth + 1 > colorTo))
-        {
+        if (depth < colorFrom || (colorTo != -1 && depth + 1 > colorTo)) {
             // We are not spreading color more in this case -> range stays the same
             fractionPerChild *= children.size();
         }
 
         bool evenChild = true;
 
-        for (auto child : children)
-        {
+        for (auto child : children) {
             float rangeEndChild = rangeStartChild + sign * fractionPerChild;
-            if (evenChild)
-            {
-                treecolor::spreadColorOverTree(edges, tree, child, 
-                    rangeStartChild, rangeEndChild, 
-                    alternate, depth+1, colorFrom, colorTo);
-            }
-            else
-            {
-                treecolor::spreadColorOverTree(edges, tree, child, 
-                    rangeEndChild, rangeStartChild, 
-                    alternate, depth+1, colorFrom, colorTo);
+            if (evenChild) {
+                treecolor::spreadColorOverTree(edges, tree, child, rangeStartChild, rangeEndChild,
+                                               alternate, depth + 1, colorFrom, colorTo);
+            } else {
+                treecolor::spreadColorOverTree(edges, tree, child, rangeEndChild, rangeStartChild,
+                                               alternate, depth + 1, colorFrom, colorTo);
             }
             rangeStartChild = rangeEndChild;
 
-            if (depth < colorFrom || (colorTo != -1 && depth + 1 > colorTo))
-            {
+            if (depth < colorFrom || (colorTo != -1 && depth + 1 > colorTo)) {
                 // Again no further division of color
                 rangeStartChild = rangeStart;
             }
@@ -76,11 +63,11 @@ void treecolor::spreadColorOverTree(const TemporalTree::TAdjacency& edges, Tempo
     }
 }
 
-void treecolor::traverseToLeavesForColor(TemporalTree & tree, size_t nodeIndex,
-    float rangeStart, float rangeEnd, 
-    bool alternate, uint64_t startTime, uint64_t endTime, uint8_t depth, float rangeDecay,
-    const int colorFrom, const int colorTo, const std::function <vec3(float)>& sampleColor)
-{
+void treecolor::traverseToLeavesForColor(TemporalTree& tree, size_t nodeIndex, float rangeStart,
+                                         float rangeEnd, bool alternate, uint64_t startTime,
+                                         uint64_t endTime, uint8_t depth, float rangeDecay,
+                                         const int colorFrom, const int colorTo,
+                                         const std::function<vec3(float)>& sampleColor) {
     // Shorthands
     TemporalTree::TNode& node = tree.nodes[nodeIndex];
     auto& colors = node.colors;
@@ -95,8 +82,7 @@ void treecolor::traverseToLeavesForColor(TemporalTree & tree, size_t nodeIndex,
 
     // Fill colors
     auto itEnd = std::next(cushion.find(endTime));
-    for (auto it = cushion.find(startTime); it != itEnd; it++)
-    {
+    for (auto it = cushion.find(startTime); it != itEnd; it++) {
         // We might overwrite things here
         auto inserted = colors.emplace(it->first, vec4(color, 1.0f));
     }
@@ -107,58 +93,49 @@ void treecolor::traverseToLeavesForColor(TemporalTree & tree, size_t nodeIndex,
 
     float decayAtOneEnd = std::abs(rangeEnd - rangeStart) * (1.0f - rangeDecay) / 2.0f;
 
-    rangeStart += sign* decayAtOneEnd;
-    rangeEnd -= sign* decayAtOneEnd;
+    rangeStart += sign * decayAtOneEnd;
+    rangeEnd -= sign * decayAtOneEnd;
 
-    if (depth < colorFrom || (colorTo != -1 && depth + 1 > colorTo))
-    {
+    if (depth < colorFrom || (colorTo != -1 && depth + 1 > colorTo)) {
         alternate = false;
     }
 
-    //not a leaf -> process children?
-    if (itHierarchyEdges != tree.edgesHierarchy.end())
-    {
+    // not a leaf -> process children?
+    if (itHierarchyEdges != tree.edgesHierarchy.end()) {
         float rangeStartChild = rangeStart;
 
         auto& children = itHierarchyEdges->second;
         float fractionPerChild = std::fabs(rangeStart - rangeEnd) / children.size();
 
-        if (depth < colorFrom || (colorTo != -1 && depth + 1 > colorTo))
-        {
+        if (depth < colorFrom || (colorTo != -1 && depth + 1 > colorTo)) {
             fractionPerChild *= children.size();
         }
 
         bool evenChild = true;
 
-        for (auto child : children)
-        {
+        for (auto child : children) {
             TemporalTree::TNode& childNode = tree.nodes[child];
             // Find the time range for which this is the child
             uint64_t startTimeChild = std::max(startTime, childNode.startTime());
             uint64_t endTimeChild = std::min(endTime, childNode.endTime());
 
-            if (startTimeChild >= endTimeChild && startTimeChild != endTimeChild)
-            {
+            if (startTimeChild >= endTimeChild && startTimeChild != endTimeChild) {
                 continue;
             }
 
             float rangeEndChild = rangeStartChild + sign * fractionPerChild;
-            if (evenChild)
-            {
-                treecolor::traverseToLeavesForColor(tree, child,
-                    rangeStartChild, rangeEndChild,
-                    alternate, startTimeChild, endTimeChild, depth + 1, rangeDecay, colorFrom, colorTo, sampleColor);
-            }
-            else
-            {
-                treecolor::traverseToLeavesForColor(tree, child,
-                    rangeEndChild, rangeStartChild,
-                    alternate, startTimeChild, endTimeChild, depth + 1, rangeDecay, colorFrom, colorTo, sampleColor);
+            if (evenChild) {
+                treecolor::traverseToLeavesForColor(
+                    tree, child, rangeStartChild, rangeEndChild, alternate, startTimeChild,
+                    endTimeChild, depth + 1, rangeDecay, colorFrom, colorTo, sampleColor);
+            } else {
+                treecolor::traverseToLeavesForColor(
+                    tree, child, rangeEndChild, rangeStartChild, alternate, startTimeChild,
+                    endTimeChild, depth + 1, rangeDecay, colorFrom, colorTo, sampleColor);
             }
             rangeStartChild = rangeEndChild;
 
-            if (depth < colorFrom || (colorTo != -1 && depth + 1 > colorTo))
-            {
+            if (depth < colorFrom || (colorTo != -1 && depth + 1 > colorTo)) {
                 rangeStartChild = rangeStart;
             }
 
@@ -167,5 +144,5 @@ void treecolor::traverseToLeavesForColor(TemporalTree & tree, size_t nodeIndex,
     }
 }
 
-} // namespace kth
-} // namespace
+}  // namespace kth
+}  // namespace inviwo

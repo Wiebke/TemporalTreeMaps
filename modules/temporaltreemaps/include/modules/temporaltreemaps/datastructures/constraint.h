@@ -15,72 +15,65 @@
 #include <modules/temporaltreemaps/datastructures/tree.h>
 #include <modules/temporaltreemaps/datastructures/treeorder.h>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
-namespace constraint
-{
+namespace constraint {
 
-    enum ConstraintType
-    {
-        Merge,
-        Split,
-        MergeSplit,
-        Hierarchy,
-        None
-    };
+enum class ConstraintType { Merge, Split, MergeSplit, Correspondance, Hierarchy, None };
 
+struct Constraint {
+    std::set<size_t> leaves;
+    uint64_t startTime = 0;
+    uint64_t endTime = std::numeric_limits<uint64_t>::max();
+    size_t level = 0;
+    ConstraintType type = ConstraintType::None;
+    bool fulfilled = false;
+};
 
-    struct Constraint
-    {
-        std::set<size_t> leaves;
-        uint64_t startTime = 0;
-        uint64_t endTime = std::numeric_limits<uint64_t>::max();
-        size_t level = 0;
-        ConstraintType type = None;
-        bool fulfilled = false;
-    };
+struct ConstraintsStatistic {
+    std::set<size_t> unhappyLeaves;
+    std::vector<size_t> fulfilledByLevelMergeSplit;
+    std::vector<size_t> fulfilledByLevelHierarchy;
 
-    struct ConstraintsStatistic
-    {
-        std::set<size_t> unhappyLeaves;
-        std::vector<size_t> fulfilledByLevelMergeSplit;
-        std::vector<size_t> fulfilledByLevelHierarchy;
+    void clear();
 
-        void clear();
+    void update(const Constraint& constraint);
 
-        void update(const Constraint& constraint);
+    size_t numFulfilledHierarchyConstraints() const;
 
-        size_t numFulfilledHierarchyConstraints() const;
+    size_t numFulFilledMergeSplitConstraints() const;
+};
 
-        size_t numFulFilledMergeSplitConstraints() const;
+/// Sums over the given vector
+size_t numConstraints(const std::vector<size_t>& numByLevel);
 
-    };
+/// CHecks if the given constraints if fulfilled
+bool isFulFilled(Constraint& constraint, std::shared_ptr<const TemporalTree>& tree,
+                 const TemporalTree::TTreeOrder& order,
+                 const TemporalTree::TTreeOrderMap& orderMap);
 
-    /// Sums over the given vector
-    size_t numConstraints(const std::vector<size_t>& numByLevel);
+/// Get the number of fulfilled constraints, where constraints are given as a set of leaves and a
+/// time interval at which the constraint has to be fulfilled
+size_t numFulfilledConstraints(std::shared_ptr<const TemporalTree>& tree,
+                               const TemporalTree::TTreeOrder& order,
+                               const TemporalTree::TTreeOrderMap& orderMap,
+                               std::vector<Constraint>& constraints,
+                               ConstraintsStatistic& statistic);
 
-    /// CHecks if the given constraints if fulfilled
-    bool isFulFilled(Constraint& constraint, std::shared_ptr<const TemporalTree> tree,
-        const TemporalTree::TTreeOrder& order, const TemporalTree::TTreeOrderMap& orderMap);
+void extractMergeSplitConstraints(std::shared_ptr<const TemporalTree>& tree,
+                                  std::vector<Constraint>& constraints,
+                                  std::vector<size_t>& numByLevel);
 
-    /// Get the number of fulfilled constraints, where constraints are given as a set of leaves and a time interval
-    /// at which the constraint has to be fulfilled
-    size_t numFulfilledConstraints(std::shared_ptr<const TemporalTree> tree,
-        const TemporalTree::TTreeOrder& order, const TemporalTree::TTreeOrderMap& orderMap,
-        std::vector<Constraint>& constraints, ConstraintsStatistic& statistic);
+void extractHierarchyConstraints(std::shared_ptr<const TemporalTree>& tree,
+                                 std::vector<Constraint>& constraints,
+                                 std::vector<size_t>& numByLevel);
 
-    void extractMergeSplitConstraints(std::shared_ptr<const TemporalTree> tree,
-        std::vector<Constraint>& constraints, std::vector<size_t>& numByLevel);
+bool isRedundant(const Constraint& constraint, const std::vector<Constraint>& constraints);
 
-    void extractHierarchyConstraints(std::shared_ptr<const TemporalTree> tree,
-        std::vector<Constraint>& constraints, std::vector<size_t>& numByLevel);
+bool isOverlappingWithConstraint(const TemporalTree::TNode& leaf, const Constraint& constraint);
 
-    bool isOverlappingWithConstraint(const TemporalTree::TNode& leaf, const Constraint& constraint);
+}  // namespace constraint
 
-}
-
-} // namespace
-} // namespace
+}  // namespace kth
+}  // namespace inviwo

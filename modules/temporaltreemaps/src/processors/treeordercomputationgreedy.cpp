@@ -11,209 +11,188 @@
 #include <modules/temporaltreemaps/processors/treeordercomputationgreedy.h>
 #include <modules/temporaltreemaps/processors/treeordercomputationheuristic.h>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
 // The Class Identifier has to be globally unique. Use a reverse DNS naming scheme
-const ProcessorInfo TemporalTreeOrderComputationGreedy::processorInfo_
-{
-    "org.inviwo.TemporalTreeOrderComputationGreedy",      // Class identifier
-    "Tree Order Computation Greedy",                // Display name
-    "Temporal Tree",              // Category
-    CodeState::Experimental,  // Code state
-    Tags::None,               // Tags
+const ProcessorInfo TemporalTreeOrderComputationGreedy::processorInfo_{
+    "org.inviwo.TemporalTreeOrderComputationGreedy",  // Class identifier
+    "Tree Order Computation Greedy",                  // Display name
+    "Temporal Tree",                                  // Category
+    CodeState::Experimental,                          // Code state
+    Tags::None,                                       // Tags
 };
 
-const ProcessorInfo TemporalTreeOrderComputationGreedy::getProcessorInfo() const
-{
+const ProcessorInfo TemporalTreeOrderComputationGreedy::getProcessorInfo() const {
     return processorInfo_;
 }
 
-TemporalTreeOrderComputationGreedy::TemporalTreeOrderComputationGreedy() :TemporalTreeOrderOptimization()
-{
+TemporalTreeOrderComputationGreedy::TemporalTreeOrderComputationGreedy()
+    : TemporalTreeOrderOptimization() {
 
-	/* Constrols */
+    /* Constrols */
 
-    propRestart.onChange([&]()
-    {
-        if (!initialized)
-        {
+    propRestart.onChange([&]() {
+        if (!initialized) {
             initializeResources();
-        }
-        else
-        {
+        } else {
             restart();
         }
         updateOutput();
     });
 
-    propSingleStep.onChange([&]()
-    {
+    propSingleStep.onChange([&]() {
         if (!initialized) initializeResources();
         performanceTimer.Reset();
         singleStep();
         propTimeForLastAction.set(performanceTimer.ElapsedTimeAndReset());
-		updateOutput();
+        updateOutput();
     });
 
-    runTimer.setCallback([this]()
-    {
+    runTimer.setCallback([this]() {
         if (!initialized) initializeResources();
-		singleStep();
+        singleStep();
         // Stop timer and performance timer when we have converged
-        if (isConverged())
-        {
+        if (isConverged()) {
             propTimeForLastAction.set(performanceTimer.ElapsedTimeAndReset());
             runTimer.stop();
             propRunStepWise.setDisplayName("Run Stepwise");
         }
-		updateOutput();
+        updateOutput();
     });
 
-    propRunUntilConvergence.onChange([&]()
-    {
-		if (!initialized || currentState.iteration != 0) initializeResources();
-		restart();
+    propRunUntilConvergence.onChange([&]() {
+        if (!initialized || currentState.iteration != 0) initializeResources();
+        restart();
         performanceTimer.Reset();
         runUntilConvergence();
         propTimeForLastAction.set(performanceTimer.ElapsedTimeAndReset());
-		if (propSaveLog) {
-			saveLog();
-		}
-		updateOutput();
+        if (propSaveLog) {
+            saveLog();
+        }
+        updateOutput();
     });
 
     logPrefix = "greedy";
 }
 
-void TemporalTreeOrderComputationGreedy::resolveConstraint()
-{
-	// best solution Ids, constraint first, 
+void TemporalTreeOrderComputationGreedy::resolveConstraint() {
+    // best solution Ids, constraint first,
     std::vector<std::pair<size_t, size_t>> bestIds;
-	double bestValue = std::numeric_limits<double>::max();
+    double bestValue = std::numeric_limits<double>::max();
 
-    for (auto& constraintId : unfulfilledConstraints)
-    {
+    for (auto& constraintId : unfulfilledConstraints) {
         Constraint& constraint = constraints[constraintId];
 
         size_t minOrder;
         size_t maxOrder;
         TemporalTree::TTreeOrder conflictingLeaves;
         TemporalTree::TTreeOrder nonConflictingAndConstraintLeaves;
-        TemporalTreeOrderComputationHeuristic::findConflictingLeaves(pInputTree, constraint, currentState.order, minOrder, maxOrder, conflictingLeaves, nonConflictingAndConstraintLeaves);
+        TemporalTreeOrderComputationHeuristic::findConflictingLeaves(
+            pInputTree, constraint, currentState.order, minOrder, maxOrder, conflictingLeaves,
+            nonConflictingAndConstraintLeaves);
 
         TemporalTree::TTreeOrder temporaryOrder;
         ConstraintsStatistic temporaryStatistics;
 
-        for (int numConflictBefore(int(conflictingLeaves.size())); numConflictBefore >= 0; numConflictBefore--)
-        {
-            TemporalTreeOrderComputationHeuristic::buildNewOrder(temporaryOrder, currentState.order, numConflictBefore, conflictingLeaves, nonConflictingAndConstraintLeaves, minOrder, maxOrder);
+        for (int numConflictBefore(int(conflictingLeaves.size())); numConflictBefore >= 0;
+             numConflictBefore--) {
+            TemporalTreeOrderComputationHeuristic::buildNewOrder(
+                temporaryOrder, currentState.order, numConflictBefore, conflictingLeaves,
+                nonConflictingAndConstraintLeaves, minOrder, maxOrder);
             double newValue = evaluateOrder(temporaryOrder, &temporaryStatistics);
 
-			// The new value is the same as best
-			if (std::abs(bestValue - newValue) < std::numeric_limits<double>::epsilon())
-			{
-				bestIds.emplace_back(constraintId, numConflictBefore);
-			}
-			// The new value is better than the best so far
-			else if (newValue < bestValue)
-			{
-				bestIds.clear();
-				bestIds.emplace_back(constraintId, numConflictBefore);
-				bestValue = newValue;
-			}
-		}
+            // The new value is the same as best
+            if (std::abs(bestValue - newValue) < std::numeric_limits<double>::epsilon()) {
+                bestIds.emplace_back(constraintId, numConflictBefore);
+            }
+            // The new value is better than the best so far
+            else if (newValue < bestValue) {
+                bestIds.clear();
+                bestIds.emplace_back(constraintId, numConflictBefore);
+                bestValue = newValue;
+            }
+        }
     }
 
-    std::uniform_int_distribution<int> chooseSolution (0, static_cast<int>(bestIds.size()-1));
+    std::uniform_int_distribution<int> chooseSolution(0, static_cast<int>(bestIds.size() - 1));
 
     size_t solutionId = chooseSolution(randomGen);
 
-	std::pair<size_t, size_t> solution = bestIds[solutionId];
+    std::pair<size_t, size_t> solution = bestIds[solutionId];
 
     size_t minOrder;
     size_t maxOrder;
     TemporalTree::TTreeOrder conflictingLeaves;
     TemporalTree::TTreeOrder nonConflictingAndConstraintLeaves;
-    TemporalTreeOrderComputationHeuristic::findConflictingLeaves(pInputTree, constraints[solution.first], currentState.order, minOrder, maxOrder, conflictingLeaves, nonConflictingAndConstraintLeaves);
+    TemporalTreeOrderComputationHeuristic::findConflictingLeaves(
+        pInputTree, constraints[solution.first], currentState.order, minOrder, maxOrder,
+        conflictingLeaves, nonConflictingAndConstraintLeaves);
 
     TemporalTree::TTreeOrder temporaryOrder;
-    TemporalTreeOrderComputationHeuristic::buildNewOrder(temporaryOrder, currentState.order, solution.second, conflictingLeaves, nonConflictingAndConstraintLeaves, minOrder, maxOrder);
+    TemporalTreeOrderComputationHeuristic::buildNewOrder(
+        temporaryOrder, currentState.order, solution.second, conflictingLeaves,
+        nonConflictingAndConstraintLeaves, minOrder, maxOrder);
 
     currentState.order = temporaryOrder;
     currentState.statistic.clear();
     currentState.value = evaluateOrder(currentState.order, &currentState.statistic);
 }
 
-void TemporalTreeOrderComputationGreedy::initializeResources()
-{
+void TemporalTreeOrderComputationGreedy::initializeResources() {
     TemporalTreeOrderOptimization::initializeResources();
 
     initialized = true;
     restart();
 }
 
-void TemporalTreeOrderComputationGreedy::restart()
-{
+void TemporalTreeOrderComputationGreedy::restart() {
     TemporalTreeOrderOptimization::restart();
 
     prepareNextStep();
 
     bestState = currentState;
-    
-	logStep();
 
+    logStep();
 }
 
-bool TemporalTreeOrderComputationGreedy::isConverged()
-{
+bool TemporalTreeOrderComputationGreedy::isConverged() {
     // the iteration number is an index starting at 0, the max is a number >= -1
-    if (currentState.iteration > propIterationsMax - 1)
-    {
+    if (currentState.iteration > propIterationsMax - 1) {
         LogProcessorInfo("Converged by reaching maximum number of iterations.");
         return true;
     }
-    if (std::abs(currentState.value) < std::numeric_limits<float>::epsilon())
-    {
+    if (std::abs(currentState.value) < std::numeric_limits<float>::epsilon()) {
         LogProcessorInfo("Converged by reaching a global optimum.");
         return true;
     }
-    if (unfulfilledConstraints.size() == 0)
-    {
+    if (unfulfilledConstraints.size() == 0) {
         LogProcessorInfo("Converged by no more constraints to fulfill");
         return true;
     }
     return false;
 }
 
-void TemporalTreeOrderComputationGreedy::singleStep()
-{
-    // Go through the queue until we have reached the maximum iterations or found a constraint to resolve
-    if (!isConverged())
-    {
+void TemporalTreeOrderComputationGreedy::singleStep() {
+    // Go through the queue until we have reached the maximum iterations or found a constraint to
+    // resolve
+    if (!isConverged()) {
         resolveConstraint();
         currentState.iteration++;
         logStep();
-        if (currentState.value < bestState.value)
-        {
+        if (currentState.value < bestState.value) {
             bestState = currentState;
         }
         prepareNextStep();
     }
-
 }
 
-void TemporalTreeOrderComputationGreedy::runUntilConvergence()
-{
-    while (!isConverged())
-    {
+void TemporalTreeOrderComputationGreedy::runUntilConvergence() {
+    while (!isConverged()) {
         resolveConstraint();
         currentState.iteration++;
         logStep();
-        if (currentState.value < bestState.value)
-        {
+        if (currentState.value < bestState.value) {
             propTimeUntilBest.set(performanceTimer.ElapsedTime());
             bestState = currentState;
         }
@@ -221,65 +200,46 @@ void TemporalTreeOrderComputationGreedy::runUntilConvergence()
     }
 }
 
-void TemporalTreeOrderComputationGreedy::prepareNextStep()
-{
+void TemporalTreeOrderComputationGreedy::prepareNextStep() {
     unfulfilledConstraints.clear();
 
     size_t constraintId(0);
-    for (auto& constraint : constraints)
-    {
-        if (!constraint.fulfilled)
-        {
+    for (auto& constraint : constraints) {
+        if (!constraint.fulfilled) {
             unfulfilledConstraints.push_back(constraintId);
         }
         constraintId++;
     }
 }
 
-void TemporalTreeOrderComputationGreedy::logStep()
-{
-    TemporalTreeOrderOptimization::logStep();
-}
+void TemporalTreeOrderComputationGreedy::logStep() { TemporalTreeOrderOptimization::logStep(); }
 
-void TemporalTreeOrderComputationGreedy::initializeLog()
-{
+void TemporalTreeOrderComputationGreedy::initializeLog() {
     TemporalTreeOrderOptimization::initializeLog();
 }
 
-void TemporalTreeOrderComputationGreedy::logProperties()
-{
+void TemporalTreeOrderComputationGreedy::logProperties() {
     const std::vector<std::string> colHeaders{
-		propSeedOrder.getDisplayName(),
-		propSeedOptimization.getDisplayName(),
-        propIterationsMax.getDisplayName(),
-        propWeightByTypeOnly.getDisplayName(),
-        propWeightTypeOnly.getDisplayName(),
-        propBestIteration.getDisplayName(),
-        propObjectiveValue.getDisplayName(),
-        propTimeUntilBest.getDisplayName(),
-        propTimeForLastAction.getDisplayName() };
+        propSeedOrder.getDisplayName(),        propSeedOptimization.getDisplayName(),
+        propIterationsMax.getDisplayName(),    propWeightByTypeOnly.getDisplayName(),
+        propWeightTypeOnly.getDisplayName(),   propBestIteration.getDisplayName(),
+        propObjectiveValue.getDisplayName(),   propTimeUntilBest.getDisplayName(),
+        propTimeForLastAction.getDisplayName()};
 
     const std::vector<std::string> exampleRow{
-		std::to_string(propSeedOrder),
-		std::to_string(propSeedOptimization),
-        std::to_string(propIterationsMax),
-        std::to_string(propWeightByTypeOnly),
-        std::to_string(propWeightTypeOnly),
-        std::to_string(bestState.iteration),
-        std::to_string(bestState.value),
-        std::to_string(propTimeUntilBest),
-        std::to_string(propTimeForLastAction) };
+        std::to_string(propSeedOrder),        std::to_string(propSeedOptimization),
+        std::to_string(propIterationsMax),    std::to_string(propWeightByTypeOnly),
+        std::to_string(propWeightTypeOnly),   std::to_string(bestState.iteration),
+        std::to_string(bestState.value),      std::to_string(propTimeUntilBest),
+        std::to_string(propTimeForLastAction)};
 
-    optimizationSettings = createDataFrame({ exampleRow }, colHeaders);
+    optimizationSettings = createDataFrame({exampleRow}, colHeaders);
     optimizationSettings->addRow(exampleRow);
 }
 
-
-void TemporalTreeOrderComputationGreedy::process()
-{
-    // Do nothing 
+void TemporalTreeOrderComputationGreedy::process() {
+    // Do nothing
 }
 
-} // namespace
-} // namespace
-
+}  // namespace kth
+}  // namespace inviwo

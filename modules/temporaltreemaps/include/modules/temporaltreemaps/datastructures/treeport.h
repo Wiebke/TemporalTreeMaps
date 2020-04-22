@@ -15,13 +15,11 @@
 #include <inviwo/core/ports/datainport.h>
 #include <inviwo/core/ports/dataoutport.h>
 
-namespace inviwo 
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
-    using TemporalTreeInport = DataInport<TemporalTree>;
-    using TemporalTreeOutport = DataOutport<TemporalTree>;
+using TemporalTreeInport = DataInport<TemporalTree>;
+using TemporalTreeOutport = DataOutport<TemporalTree>;
 
-} // namespace kth
-}
+}  // namespace kth
+}  // namespace inviwo

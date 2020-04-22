@@ -19,10 +19,8 @@
 
 #include <modules/temporaltreemaps/datastructures/treeport.h>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
 /** \docpage{org.inviwo.TemporalTreeGenerateFromFileSystem, File System Tree Generator}
     ![](org.inviwo.TemporalTreeGenerateFromFileSystem.png?classIdentifier=org.inviwo.TemporalTreeGenerateFromFileSystem)
@@ -30,26 +28,23 @@ namespace kth
     Generates a tree from a file system.
 */
 
-
 /** \class TemporalTreeGenerateFromFileSystem
     \brief Generates a tree from a file system.
-    
+
     Runs from a directory, scans its entire hierarchical content and builds a tree from it.
 
     @author Tino Weinkauf and Wiebke Koepp
 */
-class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeGenerateFromFileSystem : public Processor
-{ 
-//Friends
-//Types
+class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeGenerateFromFileSystem : public Processor {
+    // Friends
+    // Types
 public:
-
-//Construction / Deconstruction
+    // Construction / Deconstruction
 public:
     TemporalTreeGenerateFromFileSystem();
     virtual ~TemporalTreeGenerateFromFileSystem() = default;
 
-//Methods
+    // Methods
 public:
     virtual const ProcessorInfo getProcessorInfo() const override;
     static const ProcessorInfo processorInfo_;
@@ -57,30 +52,29 @@ public:
     void ScanFileSystem();
 
 protected:
-    ///Our main computation function
+    /// Our main computation function
     virtual void process() override;
 
-//Ports
+    // Ports
 public:
-    ///The output tree
+    /// The output tree
     TemporalTreeOutport portOutTree;
 
-//Properties
+    // Properties
 public:
-    ///Where to start the search
+    /// Where to start the search
     DirectoryProperty propStartDir;
 
-    ///Maximum depth
+    /// Maximum depth
     OrdinalProperty<int> propMaxDepth;
 
-    ///Since scanning is expensive and depends on the unknown filesystem,
-    ///we scan only on explicit user demand, namely when pressing this button.
+    /// Since scanning is expensive and depends on the unknown filesystem,
+    /// we scan only on explicit user demand, namely when pressing this button.
     ButtonProperty propAction;
 
-//Attributes
+    // Attributes
 private:
-
 };
 
-} // namespace kth
-} // namespace
+}  // namespace kth
+}  // namespace inviwo

@@ -31,42 +31,37 @@
 //#include <inviwo/core/properties/stringproperty.h>
 //#include <inviwo/core/properties/transferfunctionproperty.h>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
 /** \docpage{org.inviwo.TemporalTreeMeshGeneratorTopo, Tree Mesh Generator Topo}
     ![](org.inviwo.TemporalTreeMeshGeneratorTopo.png?classIdentifier=org.inviwo.TemporalTreeMeshGeneratorTopo)
 
     Explanation of how to use the processor.
-    
+
     ### Inports
       * __<Inport1>__ <description>.
-    
+
     ### Outports
       * __<Outport1>__ <description>.
-    
+
     ### Properties
       * __<Prop1>__ <description>.
       * __<Prop2>__ <description>
 */
 
-
 /** \class TemporalTreeMeshGeneratorTopo
     \brief VERY_BRIEFLY_DESCRIBE_THE_PROCESSOR
-    
+
     DESCRIBE_THE_PROCESSOR_FROM_A_DEVELOPER_PERSPECTIVE
 
     @author Tino Weinkauf and Wiebke Koepp
 */
-class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeMeshGeneratorTopo : public Processor
-{ 
-//Friends
-//Types
+class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeMeshGeneratorTopo : public Processor {
+    // Friends
+    // Types
 public:
-    struct TLayerOrderItem
-    {
+    struct TLayerOrderItem {
         size_t OrderRow;
         bool bFullCoverage;
         size_t idxLeaf;
@@ -75,48 +70,47 @@ public:
 
     typedef std::vector<TLayerOrderItem> TLayerOrder;
 
-//Construction / Deconstruction
+    // Construction / Deconstruction
 public:
     TemporalTreeMeshGeneratorTopo();
     virtual ~TemporalTreeMeshGeneratorTopo() = default;
 
-//Methods
+    // Methods
 public:
     virtual const ProcessorInfo getProcessorInfo() const override;
     static const ProcessorInfo processorInfo_;
 
 protected:
-    ///Our main computation function
+    /// Our main computation function
     virtual void process() override;
 
-    ///Creates the actual mesh
+    /// Creates the actual mesh
     void CreateMesh(const TemporalTree& Tree, const size_t Level, const size_t MaxLevel,
                     const size_t NumRows, const TLayerOrder& Order,
                     std::shared_ptr<BasicMesh>& Mesh, std::vector<BasicMesh::Vertex>& Vertices);
 
-//Ports
+    // Ports
 public:
-    ///Tree to be visualized
+    /// Tree to be visualized
     TemporalTreeInport portInTree;
 
-    ///Mesh output
+    /// Mesh output
     MeshOutport portOutMeshBands;
 
-//Properties
+    // Properties
 public:
-    ///Space between bands
+    /// Space between bands
     FloatProperty propSpacing;
 
-    ///The amount of space in a band to be reserved for the level drawing.
+    /// The amount of space in a band to be reserved for the level drawing.
     FloatProperty propLevelPortion;
 
-    ///Size of the constraint indication
+    /// Size of the constraint indication
     FloatProperty propConstraintIndication;
 
-//Attributes
+    // Attributes
 private:
-
 };
 
-} // namespace kth
-} // namespace
+}  // namespace kth
+}  // namespace inviwo

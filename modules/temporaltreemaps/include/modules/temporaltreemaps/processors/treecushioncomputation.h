@@ -27,64 +27,59 @@
 //#include <inviwo/core/properties/stringproperty.h>
 //#include <inviwo/core/properties/transferfunctionproperty.h>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
 /** \docpage{org.inviwo.TemporalTreeCushionComputation, Tree Cushion Computation}
     ![](org.inviwo.TemporalTreeCushionComputation.png?classIdentifier=org.inviwo.TemporalTreeCushionComputation)
 
     Explanation of how to use the processor.
-    
+
     ### Inports
       * __<Inport1>__ <description>.
-    
+
     ### Outports
       * __<Outport1>__ <description>.
-    
+
     ### Properties
       * __<Prop1>__ <description>.
       * __<Prop2>__ <description>
 */
 
-
 /** \class TemporalTreeCushionComputation
     \brief VERY_BRIEFLY_DESCRIBE_THE_PROCESSOR
-    
+
     DESCRIBE_THE_PROCESSOR_FROM_A_DEVELOPER_PERSPECTIVE
 
     @author Tino Weinkauf and Wiebke Koepp
 */
-class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeCushionComputation : public Processor
-{ 
-//Friends
-//Types
+class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeCushionComputation : public Processor {
+    // Friends
+    // Types
 public:
-
-//Construction / Deconstruction
+    // Construction / Deconstruction
 public:
     TemporalTreeCushionComputation();
     virtual ~TemporalTreeCushionComputation() = default;
 
-//Methods
+    // Methods
 public:
     virtual const ProcessorInfo getProcessorInfo() const override;
     static const ProcessorInfo processorInfo_;
 
 protected:
-    ///Our main computation function
+    /// Our main computation function
     virtual void process() override;
 
-    void traverseToLeavesForCushions(TemporalTree& tree, size_t nodeIndex, uint64_t startTime, uint64_t endTime, uint8_t depth);
+    void traverseToLeavesForCushions(TemporalTree& tree, size_t nodeIndex, uint64_t startTime,
+                                     uint64_t endTime, uint8_t depth);
 
-
-//Ports
+    // Ports
 public:
-    ///Input tree
+    /// Input tree
     TemporalTreeInport portInTree;
 
-    ///Tree with cushions if upper and lower limits are set
+    /// Tree with cushions if upper and lower limits are set
     TemporalTreeOutport portOutTree;
 
     FloatProperty propCushionBaseHeight;
@@ -93,13 +88,11 @@ public:
     IntProperty propCushionFrom;
     IntProperty propCushionTo;
 
-//Properties
+    // Properties
 public:
-
-//Attributes
+    // Attributes
 private:
-
 };
 
-} // namespace kth
-} // namespace
+}  // namespace kth
+}  // namespace inviwo

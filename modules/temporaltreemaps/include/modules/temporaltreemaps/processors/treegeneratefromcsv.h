@@ -35,15 +35,15 @@ namespace kth {
     ![](org.inviwo.TemporalTreeGenerateFromCSV.png?classIdentifier=org.inviwo.<name>)
 
     Explanation of how to use the processor.
-    
+
 
     ### Inports
       * __<Inport1>__ <description>.
-    
+
 
     ### Outports
       * __<Outport1>__ <description>.
-    
+
 
     ### Properties
       * __<Prop1>__ <description>.
@@ -52,42 +52,41 @@ namespace kth {
 
 /** \class <name>
     \brief VERY_BRIEFLY_DESCRIBE_THE_PROCESSOR
-    
+
 
     DESCRIBE_THE_PROCESSOR_FROM_A_DEVELOPER_PERSPECTIVE
 
     @author <author>
 */
-class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeGenerateFromCSV
-    : public Processor {
-  // Friends
-  // Types
- public:
-  // Construction / Deconstruction
- public:
-  TemporalTreeGenerateFromCSV();
-  virtual ~TemporalTreeGenerateFromCSV() = default;
+class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeGenerateFromCSV : public Processor {
+    // Friends
+    // Types
+public:
+    // Construction / Deconstruction
+public:
+    TemporalTreeGenerateFromCSV();
+    virtual ~TemporalTreeGenerateFromCSV() = default;
 
-  // Methods
- public:
-  virtual const ProcessorInfo getProcessorInfo() const override;
-  static const ProcessorInfo processorInfo_;
+    // Methods
+public:
+    virtual const ProcessorInfo getProcessorInfo() const override;
+    static const ProcessorInfo processorInfo_;
 
- protected:
-  /// Our main computation function
-  virtual void process() override;
+protected:
+    /// Our main computation function
+    virtual void process() override;
 
-  // Ports
- public:
-  DataFrameInport inHierarchy;
-  DataFrameInport inDataValues;
+    // Ports
+public:
+    DataFrameInport inHierarchy;
+    DataFrameInport inDataValues;
 
-  TemporalTreeOutport outTree;
+    TemporalTreeOutport outTree;
 
-  // Properties
- public:
-  // Attributes
- private:
+    // Properties
+public:
+    // Attributes
+private:
 };
 
 }  // namespace kth

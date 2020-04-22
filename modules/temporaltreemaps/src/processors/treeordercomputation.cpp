@@ -1,39 +1,35 @@
 /*********************************************************************
-*  Author  : Tino Weinkauf and Wiebke Koepp
-*  Init    : Friday, March 23, 2018 - 15:58:29
-*
-*  Project : KTH Inviwo Modules
-*
-*  License : Follows the Inviwo BSD license model
-*********************************************************************
-*/
+ *  Author  : Tino Weinkauf and Wiebke Koepp
+ *  Init    : Friday, March 23, 2018 - 15:58:29
+ *
+ *  Project : KTH Inviwo Modules
+ *
+ *  License : Follows the Inviwo BSD license model
+ *********************************************************************
+ */
 
 #include <inviwo/core/util/utilities.h>
 #include <modules/temporaltreemaps/processors/treeordercomputation.h>
 #include <random>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
 // The Class Identifier has to be globally unique. Use a reverse DNS naming scheme
-const ProcessorInfo TemporalTreeOrderOptimization::processorInfo_
-{
-    "org.inviwo.TemporalTreeOrderOptimization", // Class identifier
-    "Tree Order Optimization",         // Display name
-    "Temporal Tree",          // Category
-    CodeState::Experimental,  // Code state
-    Tags::None,               // Tags
+const ProcessorInfo TemporalTreeOrderOptimization::processorInfo_{
+    "org.inviwo.TemporalTreeOrderOptimization",  // Class identifier
+    "Tree Order Optimization",                   // Display name
+    "Temporal Tree",                             // Category
+    CodeState::Experimental,                     // Code state
+    Tags::None,                                  // Tags
 };
 
-const ProcessorInfo TemporalTreeOrderOptimization::getProcessorInfo() const
-{
+const ProcessorInfo TemporalTreeOrderOptimization::getProcessorInfo() const {
     return processorInfo_;
 }
 
 TemporalTreeOrderOptimization::TemporalTreeOrderOptimization()
-    :Processor()
+    : Processor()
     // Input/Output
     , portInTree("inTree")
     , portOutTree("outTree")
@@ -46,13 +42,13 @@ TemporalTreeOrderOptimization::TemporalTreeOrderOptimization()
     , propWeightByTypeOnly("weightByTypeOnly", "Weight By Type Only", true)
     , propWeightTypeOnly("weightTypeOnly", "Type Only", 0.5, 0.01, 1.0, 0.01)
     , propWeightByType("weightByType", "Weight By Type", false)
-    , propWeightMergeSplit("weightMergeSplit", "Merge/Split", 1, 0.l, 10,0)
+    , propWeightMergeSplit("weightMergeSplit", "Merge/Split", 1, 0.l, 10, 0)
     , propWeightHierarchy("weightHierarchy", "Hierarchy", 1, 0.l, 10.0)
-	, propWeightBySize("weightBySize", "Weight By Size", false)
-	, propWeightSize("weightSize", "Size", 1, 0.l, 10.0)
+    , propWeightBySize("weightBySize", "Weight By Size", false)
+    , propWeightSize("weightSize", "Size", 1, 0.l, 10.0)
     , propWeightByLevel("weightByLevel", "Weight By Level", false)
     , propWeightLevel("weightLevel", "Level", 1.0, 0.l, 10.0)
-	, propInitialOrder("initialOrder", "Initial Order")
+    , propInitialOrder("initialOrder", "Initial Order")
     , propUseInputOrder("useInputOrder", "Use input order", false)
     , propRandomizeOrder("randomizeInitial", "Randomize initial order", false)
     , propRandomOrSeedOrder("randomOrSeedOrder", "Random Seed for Order", true)
@@ -66,14 +62,13 @@ TemporalTreeOrderOptimization::TemporalTreeOrderOptimization()
     , propSingleStep("SingleStep", "Single Step")
     , propRunStepWise("runStepwise", "Run Stepwise")
     , propRunUntilConvergence("runConvergence", "Run until Convergence")
-    , runTimer(std::chrono::milliseconds{ 10 }, []() {})
+    , runTimer(std::chrono::milliseconds{10}, []() {})
     // Current State
     , propCurrentState("currentState", "Current State")
     , propCurrentIteration("currentIteration", "Current Iter", 0, 0, 1000000000, 1)
     , propBestIteration("bestIteration", "Best Iter", 0, 0, 1000000000, 1)
     , propOutputBestOrder("outputBestOrder", "Output Best Order", false)
-    , propFulfilledConstraintsTotal("fulfilledConstraints",
-        "Total", "")
+    , propFulfilledConstraintsTotal("fulfilledConstraints", "Total", "")
     , propStatisticsMergeSplit("statisticsMergeSplit", "Merge/Split", "")
     , propStatisticsHierarchy("statisticsHierarchy", "Hierarchy", "")
     , propObjectiveValue("objectiveValue", "Value", 0.f, 0.f, 10000.f, 0.1f)
@@ -84,12 +79,10 @@ TemporalTreeOrderOptimization::TemporalTreeOrderOptimization()
     , propSaveLog("saveLog", "Save Log", false)
     , propLogDirectory("logDirectory", "Log Directory")
     , propLogSettingsFile("settingsFile", "Log File Settings")
-    , propLogOptimizationFile("optimizationFile", "Log File Optimization")
-{
+    , propLogOptimizationFile("optimizationFile", "Log File Optimization") {
     // Ports
     addPort(portInTree);
-    portInTree.onChange([&]()
-    {
+    portInTree.onChange([&]() {
         initializeResources();
         updateOutput();
     });
@@ -110,90 +103,73 @@ TemporalTreeOrderOptimization::TemporalTreeOrderOptimization()
 
     propSettings.addProperty(propInitialOrder);
 
-	propInitialOrder.addProperty(propUseInputOrder);
-    propUseInputOrder.onChange([&]()
-    {
-        if (!initialized)
-        {
+    propInitialOrder.addProperty(propUseInputOrder);
+    propUseInputOrder.onChange([&]() {
+        if (!initialized) {
             initializeResources();
-        }
-        else
-        {
+        } else {
             restart();
         }
     });
 
-	propInitialOrder.addProperty(propRandomizeOrder);
-	propRandomizeOrder.onChange([&]()
-	{
-		if (!initialized)
-		{
-			initializeResources();
-		}
-		else
-		{
-			restart();
-		}
-		if (propRandomizeOrder) {
-			util::show(propSeedOrder, propRandomOrSeedOrder);
-		}
-		else {
-			util::hide(propSeedOrder, propRandomOrSeedOrder);
-		}
-	});
+    propInitialOrder.addProperty(propRandomizeOrder);
+    propRandomizeOrder.onChange([&]() {
+        if (!initialized) {
+            initializeResources();
+        } else {
+            restart();
+        }
+        if (propRandomizeOrder) {
+            util::show(propSeedOrder, propRandomOrSeedOrder);
+        } else {
+            util::hide(propSeedOrder, propRandomOrSeedOrder);
+        }
+    });
 
-	propInitialOrder.addProperty(propRandomOrSeedOrder);
-	propRandomOrSeedOrder.onChange([&]()
-	{
-		propSeedOrder.setReadOnly(propRandomOrSeedOrder.get());
-	});
+    propInitialOrder.addProperty(propRandomOrSeedOrder);
+    propRandomOrSeedOrder.onChange(
+        [&]() { propSeedOrder.setReadOnly(propRandomOrSeedOrder.get()); });
 
-	propInitialOrder.addProperty(propSeedOrder);
-	propSeedOrder.setSemantics(PropertySemantics::Text);
-	propSeedOrder.onChange([&]() { if (!propRandomOrSeedOrder.get()) restart(); });
+    propInitialOrder.addProperty(propSeedOrder);
+    propSeedOrder.setSemantics(PropertySemantics::Text);
+    propSeedOrder.onChange([&]() {
+        if (!propRandomOrSeedOrder.get()) restart();
+    });
 
-	util::hide(propSeedOrder, propRandomOrSeedOrder);
+    util::hide(propSeedOrder, propRandomOrSeedOrder);
 
-	propSettings.addProperty(propRandomnessOptimization);
+    propSettings.addProperty(propRandomnessOptimization);
 
-	propRandomnessOptimization.addProperty(propSeedOptimization);
-	propSeedOptimization.setSemantics(PropertySemantics::Text);
+    propRandomnessOptimization.addProperty(propSeedOptimization);
+    propSeedOptimization.setSemantics(PropertySemantics::Text);
 
-	propRandomnessOptimization.addProperty(propRandomOrSeedOptimization);
-	propRandomOrSeedOptimization.onChange([&]()
-	{
-		propSeedOptimization.setReadOnly(propRandomOrSeedOptimization.get());
-	});
-	propSeedOptimization.onChange([&]() { if (!propRandomOrSeedOptimization.get()) restart(); });
-	
+    propRandomnessOptimization.addProperty(propRandomOrSeedOptimization);
+    propRandomOrSeedOptimization.onChange(
+        [&]() { propSeedOptimization.setReadOnly(propRandomOrSeedOptimization.get()); });
+    propSeedOptimization.onChange([&]() {
+        if (!propRandomOrSeedOptimization.get()) restart();
+    });
+
     propSettings.addProperty(propObjectiveFunction);
 
     propObjectiveFunction.addProperty(propWeightByType);
     propObjectiveFunction.addProperty(propWeightMergeSplit);
     propObjectiveFunction.addProperty(propWeightHierarchy);
-    propWeightByType.onChange([&]()
-    {
-        if (propWeightByType)
-        {
+    propWeightByType.onChange([&]() {
+        if (propWeightByType) {
             util::show(propWeightMergeSplit, propWeightHierarchy);
-        }
-        else
-        {
+        } else {
             util::hide(propWeightMergeSplit, propWeightHierarchy);
         }
     });
 
     propObjectiveFunction.addProperty(propWeightByTypeOnly);
     propObjectiveFunction.addProperty(propWeightTypeOnly);
-    propWeightByTypeOnly.onChange([&]()
-    {
-        if (propWeightByTypeOnly)
-        {
+    propWeightByTypeOnly.onChange([&]() {
+        if (propWeightByTypeOnly) {
             util::show(propWeightTypeOnly);
             util::hide(propWeightBySize, propWeightByType, propWeightByLevel);
-        }
-        else
-        {
+        } else {
             util::hide(propWeightTypeOnly);
             util::show(propWeightBySize, propWeightByType, propWeightByLevel);
         }
@@ -201,28 +177,20 @@ TemporalTreeOrderOptimization::TemporalTreeOrderOptimization()
 
     propObjectiveFunction.addProperty(propWeightBySize);
     propObjectiveFunction.addProperty(propWeightSize);
-    propWeightBySize.onChange([&]()
-    {
-        if (propWeightBySize)
-        {
+    propWeightBySize.onChange([&]() {
+        if (propWeightBySize) {
             util::show(propWeightSize);
-        }
-        else
-        {
+        } else {
             util::hide(propWeightSize);
         }
     });
 
     propObjectiveFunction.addProperty(propWeightByLevel);
     propObjectiveFunction.addProperty(propWeightLevel);
-    propWeightByLevel.onChange([&]()
-    {
-        if (propWeightByLevel)
-        {
+    propWeightByLevel.onChange([&]() {
+        if (propWeightByLevel) {
             util::show(propWeightLevel);
-        }
-        else
-        {
+        } else {
             util::hide(propWeightLevel);
         }
     });
@@ -239,16 +207,12 @@ TemporalTreeOrderOptimization::TemporalTreeOrderOptimization()
     propControls.addProperty(propRunStepWise);
     propControls.addProperty(propRunUntilConvergence);
 
-    propRunStepWise.onChange([&]()
-    {
-        if (runTimer.isRunning())
-        {
+    propRunStepWise.onChange([&]() {
+        if (runTimer.isRunning()) {
             propTimeForLastAction.set(performanceTimer.ElapsedTimeAndReset());
             runTimer.stop();
             propRunStepWise.setDisplayName("Run Stepwise");
-        }
-        else
-        {
+        } else {
             performanceTimer.Reset();
             runTimer.start();
             propRunStepWise.setDisplayName("Stop");
@@ -304,100 +268,84 @@ TemporalTreeOrderOptimization::TemporalTreeOrderOptimization()
     propLogSettingsFile.setReadOnly(true);
 }
 
-void TemporalTreeOrderOptimization::fillStatistics(const ConstraintsStatistic& statistic)
-{
-    const size_t numFulfilled = statistic.numFulfilledHierarchyConstraints() + statistic.numFulFilledMergeSplitConstraints();
+void TemporalTreeOrderOptimization::fillStatistics(const ConstraintsStatistic& statistic) {
+    const size_t numFulfilled = statistic.numFulfilledHierarchyConstraints() +
+                                statistic.numFulFilledMergeSplitConstraints();
 
-    propFulfilledConstraintsTotal.set(std::to_string(numFulfilled) + " / " + std::to_string(constraints.size()));
+    propFulfilledConstraintsTotal.set(std::to_string(numFulfilled) + " / " +
+                                      std::to_string(constraints.size()));
 
     std::string mergeSplit;
 
-    for (size_t level = 1; level < numByLevelMergeSplit.size(); level++)
-    {
-        if (level + 1 <= statistic.fulfilledByLevelMergeSplit.size())
-        {
-            mergeSplit += std::to_string(statistic.fulfilledByLevelMergeSplit[level]) 
-            + "/" + std::to_string(numByLevelMergeSplit[level]);
-        }
-        else
-        {
+    for (size_t level = 1; level < numByLevelMergeSplit.size(); level++) {
+        if (level + 1 <= statistic.fulfilledByLevelMergeSplit.size()) {
+            mergeSplit += std::to_string(statistic.fulfilledByLevelMergeSplit[level]) + "/" +
+                          std::to_string(numByLevelMergeSplit[level]);
+        } else {
             mergeSplit += "0/" + std::to_string(numByLevelMergeSplit[level]);
         }
 
-        if (level < numByLevelMergeSplit.size() -1)
-        {
+        if (level < numByLevelMergeSplit.size() - 1) {
             mergeSplit += " - ";
         }
     }
 
     std::string hierarchy;
 
-    for (size_t level = 1; level < numByLevelHierarchy.size(); level++)
-    {
-        if (level + 1 <= statistic.fulfilledByLevelHierarchy.size())
-        {
-            hierarchy += std::to_string(statistic.fulfilledByLevelHierarchy[level]) + "/" + std::to_string(numByLevelHierarchy[level]);
-        }
-        else
-        {
+    for (size_t level = 1; level < numByLevelHierarchy.size(); level++) {
+        if (level + 1 <= statistic.fulfilledByLevelHierarchy.size()) {
+            hierarchy += std::to_string(statistic.fulfilledByLevelHierarchy[level]) + "/" +
+                         std::to_string(numByLevelHierarchy[level]);
+        } else {
             hierarchy += "0/" + std::to_string(numByLevelHierarchy[level]);
         }
 
-        if (level < numByLevelHierarchy.size() - 1)
-        {
+        if (level < numByLevelHierarchy.size() - 1) {
             hierarchy += " - ";
         }
     }
 
     propStatisticsMergeSplit.set(mergeSplit);
     propStatisticsHierarchy.set(hierarchy);
-
 }
 
-void TemporalTreeOrderOptimization::setInitialOrder()
-{
+void TemporalTreeOrderOptimization::setInitialOrder() {
 
     currentState.order.clear();
 
-    if (propUseInputOrder)
-    {
-		// We can use the input order only when it fits with the tree        
-		if (treeorder::fitsWithTree(*pInputTree, pInputTree->order)) 
-		{
-			currentState.order = pInputTree->order;
-		} 
-		else {
-			LogProcessorWarn("Inconsistent order given in the tree, falling back to depth-first ordering.");
-			treeorder::orderAsDepthFirst(currentState.order, *pInputTree, pInputTree->edgesHierarchy);
-		}
-    }
-    else
-    {
+    if (propUseInputOrder) {
+        // We can use the input order only when it fits with the tree
+        if (treeorder::fitsWithTree(*pInputTree, pInputTree->order)) {
+            currentState.order = pInputTree->order;
+        } else {
+            LogProcessorWarn(
+                "Inconsistent order given in the tree, falling back to depth-first ordering.");
+            treeorder::orderAsDepthFirst(currentState.order, *pInputTree,
+                                         pInputTree->edgesHierarchy);
+        }
+    } else {
         treeorder::orderAsDepthFirst(currentState.order, *pInputTree, pInputTree->edgesHierarchy);
     }
 
-    if (propRandomizeOrder)
-    {
-		if (propUseInputOrder) {
-			LogProcessorWarn("Using the input order takes precedence over order randomization. Order is not randomized.")
-		}
-		else {
-			std::mt19937 randomGenOrder;
+    if (propRandomizeOrder) {
+        if (propUseInputOrder) {
+            LogProcessorWarn(
+                "Using the input order takes precedence over order randomization. Order is not "
+                "randomized.")
+        } else {
+            std::mt19937 randomGenOrder;
 
-			//Generate a random seed if so desired and set it
-			if (propRandomOrSeedOrder.get())
-			{
-				propSeedOrder.set(rand());
-			}
-			randomGenOrder.seed(static_cast<std::mt19937::result_type>(propSeedOrder));
-			std::shuffle(currentState.order.begin(), currentState.order.end(), randomGenOrder);
-		}	
+            // Generate a random seed if so desired and set it
+            if (propRandomOrSeedOrder.get()) {
+                propSeedOrder.set(rand());
+            }
+            randomGenOrder.seed(static_cast<std::mt19937::result_type>(propSeedOrder));
+            std::shuffle(currentState.order.begin(), currentState.order.end(), randomGenOrder);
+        }
     }
-
 }
 
-void TemporalTreeOrderOptimization::initializeResources()
-{
+void TemporalTreeOrderOptimization::initializeResources() {
     // Get tree
     std::shared_ptr<const TemporalTree> pTreeIn = portInTree.getData();
     if (!pTreeIn) return;
@@ -410,131 +358,115 @@ void TemporalTreeOrderOptimization::initializeResources()
     constraints.clear();
 
     // Extract constraints from the tree
-    numByLevelMergeSplit.clear();
-    extractMergeSplitConstraints(pInputTree, constraints, numByLevelMergeSplit);
-    numConstraintsMergeSplit = constraints.size();
     numByLevelHierarchy.clear();
     extractHierarchyConstraints(pInputTree, constraints, numByLevelHierarchy);
-    numConstraintsHierarchy = constraints.size() - numConstraintsMergeSplit;
-    
+    numConstraintsHierarchy = constraints.size();
+    numByLevelMergeSplit.clear();
+    extractMergeSplitConstraints(pInputTree, constraints, numByLevelMergeSplit);
+    numConstraintsMergeSplit = constraints.size() - numConstraintsHierarchy;
+
     maxConstraintSize = 0;
     maxConstraintLevel = 0;
-    for (auto& constraint : constraints)
-    {
-        if (constraint.leaves.size() > maxConstraintSize) maxConstraintSize = constraint.leaves.size();
+    for (auto& constraint : constraints) {
+        if (constraint.leaves.size() > maxConstraintSize)
+            maxConstraintSize = constraint.leaves.size();
         if (constraint.level > maxConstraintLevel) maxConstraintLevel = constraint.level;
     }
-    
 }
 
-double TemporalTreeOrderOptimization::weighUnfulfilledConstraint(Constraint& constraint)
-{
+double TemporalTreeOrderOptimization::weighUnfulfilledConstraint(Constraint& constraint) {
     double constraintValue = 1.0;
 
-    if (propWeightByTypeOnly)
-    {
-        constraintValue *= constraint.type == Hierarchy ? (propWeightTypeOnly) / numConstraintsHierarchy :
-        (1.0 - propWeightTypeOnly) / numConstraintsMergeSplit;
-    } else
-    {
-        if (propWeightByType)
-        {
-            constraintValue *= constraint.type == Hierarchy ? propWeightHierarchy : propWeightMergeSplit;
+    if (propWeightByTypeOnly) {
+        constraintValue *= constraint.type == ConstraintType::Hierarchy
+                               ? (propWeightTypeOnly) / numConstraintsHierarchy
+                               : (1.0 - propWeightTypeOnly) / numConstraintsMergeSplit;
+    } else {
+        if (propWeightByType) {
+            constraintValue *= constraint.type == ConstraintType::Hierarchy ? propWeightHierarchy
+                                                                            : propWeightMergeSplit;
         }
-        if (propWeightByLevel)
-        {
-            constraintValue *= propWeightLevel * (maxConstraintLevel - (constraint.level - 1)) / maxConstraintLevel;
+        if (propWeightByLevel) {
+            constraintValue *= propWeightLevel * (maxConstraintLevel - (constraint.level - 1)) /
+                               maxConstraintLevel;
         }
-        if (propWeightBySize)
-        {
+        if (propWeightBySize) {
             constraintValue *= propWeightSize * constraint.leaves.size() / maxConstraintSize;
         }
-        if (!propWeightByType && !propWeightBySize && !propWeightByLevel)
-        {
+        if (!propWeightByType && !propWeightBySize && !propWeightByLevel) {
             constraintValue *= 1.0 / (numConstraintsMergeSplit + numConstraintsHierarchy);
         }
     }
-    
+
     return constraintValue;
 }
 
-
-double TemporalTreeOrderOptimization::evaluateOrder(const TemporalTree::TTreeOrder& order, ConstraintsStatistic* statistic)
-{
+double TemporalTreeOrderOptimization::evaluateOrder(const TemporalTree::TTreeOrder& order,
+                                                    ConstraintsStatistic* statistic) {
     double value = 0.0;
 
-	// If a ConstraintsStatistic is given
-    if (statistic)
-    {
+    // If a ConstraintsStatistic is given
+    if (statistic) {
         (*statistic).clear();
     }
 
     TemporalTree::TTreeOrderMap orderMap;
     treeorder::toOrderMap(orderMap, order);
 
-    for (auto& constraint : constraints)
-    {
-        if (!isFulFilled(constraint, pInputTree, order, orderMap))
-        {
+    for (auto& constraint : constraints) {
+        if (!isFulFilled(constraint, pInputTree, order, orderMap)) {
             value += weighUnfulfilledConstraint(constraint);
         }
         // If a ConstraintsStatistic is given
-        if (statistic)
-        {
+        if (statistic) {
             (*statistic).update(constraint);
         }
-
     }
 
     return value;
 }
 
-double TemporalTreeOrderOptimization::evaluateOrder(const TemporalTree::TTreeOrder& order)
-{
+double TemporalTreeOrderOptimization::evaluateOrder(const TemporalTree::TTreeOrder& order) {
     return evaluateOrder(order, nullptr);
 }
 
-void TemporalTreeOrderOptimization::restart()
-{
-	// Get tree
-	std::shared_ptr<const TemporalTree> pTreeIn = portInTree.getData();
-	if (!pTreeIn) return;
+void TemporalTreeOrderOptimization::restart() {
+    // Get tree
+    std::shared_ptr<const TemporalTree> pTreeIn = portInTree.getData();
+    if (!pTreeIn) return;
 
-	if (!initialized || !pInputTree)
-	{
-		initializeResources();
-	}
+    if (!initialized || !pInputTree) {
+        initializeResources();
+    }
 
-	//Generate a random seed if so desired and set it
-	if (propRandomOrSeedOptimization.get())
-	{
-		propSeedOptimization.set(rand());
-	}
-	randomGen.seed(static_cast<std::mt19937::result_type>(propSeedOptimization));
+    // Generate a random seed if so desired and set it
+    if (propRandomOrSeedOptimization.get()) {
+        propSeedOptimization.set(rand());
+    }
+    randomGen.seed(static_cast<std::mt19937::result_type>(propSeedOptimization));
 
-	currentState.iteration = 0;
-	currentState.statistic.clear();
-	setInitialOrder();
-	currentState.value = evaluateOrder(currentState.order, &currentState.statistic);
+    currentState.iteration = 0;
+    currentState.statistic.clear();
+    setInitialOrder();
+    currentState.value = evaluateOrder(currentState.order, &currentState.statistic);
 
-	setFileNames();
+    setFileNames();
 }
 
-void TemporalTreeOrderOptimization::updateOutput()
-{
+void TemporalTreeOrderOptimization::updateOutput() {
     std::shared_ptr<const TemporalTree> pTreeIn = portInTree.getData();
     if (!pTreeIn) return;
 
     // Copy tree to output things
-    std::shared_ptr<TemporalTree> pTreeOut =
-        std::make_shared<TemporalTree>(TemporalTree(*pTreeIn));
+    std::shared_ptr<TemporalTree> pTreeOut = std::make_shared<TemporalTree>(TemporalTree(*pTreeIn));
 
     propCurrentIteration.set(int(currentState.iteration) - 1);
     propBestIteration.set(int(bestState.iteration) - 1);
 
     // Get statistics of how many constraints are fulfilled
     fillStatistics(propOutputBestOrder ? bestState.statistic : currentState.statistic);
-    propObjectiveValue.set(propOutputBestOrder ? float(bestState.value) : float(currentState.value));
+    propObjectiveValue.set(propOutputBestOrder ? float(bestState.value)
+                                               : float(currentState.value));
 
     // Set the order
     pTreeOut->order = propOutputBestOrder ? bestState.order : currentState.order;
@@ -543,48 +475,43 @@ void TemporalTreeOrderOptimization::updateOutput()
     portOutTree.setData(pTreeOut);
 }
 
-void TemporalTreeOrderOptimization::saveLog()
-{
-	OptimizationState currentStateBackup = currentState;
-	logProperties();
-	// Log the best state in the very last row
+void TemporalTreeOrderOptimization::saveLog() {
+    OptimizationState currentStateBackup = currentState;
+    logProperties();
+    // Log the best state in the very last row
     currentState = bestState;
     logStep();
-	currentState = currentStateBackup;
+    currentState = currentStateBackup;
     portOutLogOptimization.setData(optimizationStatistics);
     portOutLogSettings.setData(optimizationSettings);
 }
 
-void TemporalTreeOrderOptimization::logStep()
-{
+void TemporalTreeOrderOptimization::logStep() {
     if (!optimizationStatistics) return;
 
     bool firstRow = optimizationStatistics->getNumberOfRows() == 0;
 
-    size_t numUnfulfilledMergeSplit = numConstraintsMergeSplit - currentState.statistic.numFulFilledMergeSplitConstraints();
-    size_t numUnfulfilledHierarchy = numConstraintsHierarchy - currentState.statistic.numFulfilledHierarchyConstraints();
+    size_t numUnfulfilledMergeSplit =
+        numConstraintsMergeSplit - currentState.statistic.numFulFilledMergeSplitConstraints();
+    size_t numUnfulfilledHierarchy =
+        numConstraintsHierarchy - currentState.statistic.numFulfilledHierarchyConstraints();
 
     std::vector<std::string> newRow{
-        std::to_string(int(currentState.iteration) - 1), //"Iteration"
-        std::to_string(currentState.value), //"Current Value",
+        std::to_string(int(currentState.iteration) - 1),  //"Iteration"
+        std::to_string(currentState.value),               //"Current Value",
         std::to_string(firstRow ? numConstraintsMergeSplit : numUnfulfilledMergeSplit),
         std::to_string(firstRow ? numConstraintsHierarchy : numUnfulfilledHierarchy),
-        std::to_string(firstRow ? numConstraintsHierarchy + numConstraintsMergeSplit : numUnfulfilledMergeSplit + numUnfulfilledHierarchy),
-        std::to_string(currentState.statistic.unhappyLeaves.size())
-    };
+        std::to_string(firstRow ? numConstraintsHierarchy + numConstraintsMergeSplit
+                                : numUnfulfilledMergeSplit + numUnfulfilledHierarchy),
+        std::to_string(currentState.statistic.unhappyLeaves.size())};
 
     optimizationStatistics->addRow(newRow);
 }
 
-void TemporalTreeOrderOptimization::initializeLog()
-{
-    const std::vector<std::string> colHeaders{
-        "Iteration",
-        "Value",
-        "Unfulfilled Merge",
-        "Unfulfilled Hierarchy",
-        "Unfulfilled Total",
-        "Unhappy leaves" };
+void TemporalTreeOrderOptimization::initializeLog() {
+    const std::vector<std::string> colHeaders{"Iteration",         "Value",
+                                              "Unfulfilled Merge", "Unfulfilled Hierarchy",
+                                              "Unfulfilled Total", "Unhappy leaves"};
 
     const std::vector<std::string> exampleRow{
         std::to_string(currentState.iteration),
@@ -592,32 +519,26 @@ void TemporalTreeOrderOptimization::initializeLog()
         std::to_string(numConstraintsMergeSplit),
         std::to_string(numConstraintsHierarchy),
         std::to_string(numConstraintsHierarchy),
-        std::to_string(currentState.statistic.unhappyLeaves.size()) };
+        std::to_string(currentState.statistic.unhappyLeaves.size())};
 
-    optimizationStatistics = createDataFrame({ exampleRow }, colHeaders);
+    optimizationStatistics = createDataFrame({exampleRow}, colHeaders);
 }
 
-void TemporalTreeOrderOptimization::setFileNames()
-{
+void TemporalTreeOrderOptimization::setFileNames() {
     initializeLog();
 
-    time_t t = time(0);   // get time now
-    struct tm * now = localtime(&t);
+    time_t t = time(0);  // get time now
+    struct tm* now = localtime(&t);
 
     std::stringstream ss;
 
-    ss << (now->tm_year + 1900) << '-'
-        << (now->tm_mon + 1) << '-'
-        << now->tm_mday << '_'
-        << now->tm_hour << '-'
-        << now->tm_min << '-'
-        << now->tm_sec << '-' << clock();
+    ss << (now->tm_year + 1900) << '-' << (now->tm_mon + 1) << '-' << now->tm_mday << '_'
+       << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << '-' << clock();
     std::string timeStamp = ss.str();
 
-    propLogOptimizationFile.set(propLogDirectory.get() + "/" + logPrefix + timeStamp + ".csv" );
+    propLogOptimizationFile.set(propLogDirectory.get() + "/" + logPrefix + timeStamp + ".csv");
     propLogSettingsFile.set(propLogDirectory.get() + "/" + logPrefix + timeStamp + "_settings.csv");
 }
 
-} // namespace
-} // namespace
-
+}  // namespace kth
+}  // namespace inviwo

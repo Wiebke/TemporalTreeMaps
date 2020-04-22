@@ -20,76 +20,73 @@
 #include <inviwo/core/properties/boolproperty.h>
 #include <inviwo/core/properties/compositeproperty.h>
 
-namespace inviwo
-{
+namespace inviwo {
 
-namespace kth
-{
+namespace kth {
 
 /** \docpage{org.inviwo.TemporalTreeMeshGenerator, Tree Mesh Generator}
     ![](org.inviwo.TemporalTreeMeshGenerator.png?classIdentifier=org.inviwo.TemporalTreeMeshGenerator)
 
     Explanation of how to use the processor.
-    
+
     ### Inports
       * __<Inport1>__ <description>.
-    
+
     ### Outports
       * __<Outport1>__ <description>.
-    
+
     ### Properties
       * __<Prop1>__ <description>.
       * __<Prop2>__ <description>
 */
 
-
 /** \class TemporalTreeMeshGenerator
     \brief VERY_BRIEFLY_DESCRIBE_THE_PROCESSOR
-    
+
     DESCRIBE_THE_PROCESSOR_FROM_A_DEVELOPER_PERSPECTIVE
 
     @author Tino Weinkauf and Wiebke Koepp
 */
-class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeMeshGenerator : public Processor
-{ 
-//Friends
-//Types
+class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeMeshGenerator : public Processor {
+    // Friends
+    // Types
 public:
-
-//Construction / Deconstruction
+    // Construction / Deconstruction
 public:
     TemporalTreeMeshGenerator();
     virtual ~TemporalTreeMeshGenerator() = default;
 
-//Methods
+    // Methods
 public:
     virtual const ProcessorInfo getProcessorInfo() const override;
     static const ProcessorInfo processorInfo_;
 
 protected:
-    ///Our main computation function
+    /// Our main computation function
     virtual void process() override;
 
-    float normalTime(uint64_t time, uint64_t tMin, uint64_t tMax) const
-    {
+    float normalTime(uint64_t time, uint64_t tMin, uint64_t tMax) const {
         return (time - tMin) / float(tMax - tMin);
     };
 
-    uint64_t deNormalTime(float time, uint64_t tMin, uint64_t tMax) const
-    {
+    uint64_t deNormalTime(float time, uint64_t tMin, uint64_t tMax) const {
         return uint64_t(time * float(tMax - tMin) + tMin);
     };
 
-    void makeMesh(const TemporalTree& tree, std::shared_ptr<BasicMesh> meshBands, std::vector<BasicMesh::Vertex>& verticesBands,
-        std::shared_ptr<BasicMesh> meshLines, std::vector<BasicMesh::Vertex>& verticesLines);
+    void makeMesh(const TemporalTree& tree, std::shared_ptr<BasicMesh> meshBands,
+                  std::vector<BasicMesh::Vertex>& verticesBands,
+                  std::shared_ptr<BasicMesh> meshLines,
+                  std::vector<BasicMesh::Vertex>& verticesLines);
 
-    void drawVertexPair(const float x, const float yLower, const float yUpper, const vec3& coefficients, const vec4& color,
-        IndexBufferRAM& indexBufferBand, std::vector<BasicMesh::Vertex>& verticesBands);
+    void drawVertexPair(const float x, const float yLower, const float yUpper,
+                        const vec3& coefficients, const vec4& color,
+                        IndexBufferRAM& indexBufferBand,
+                        std::vector<BasicMesh::Vertex>& verticesBands);
 
-    void drawLineVertex(const float x, const float y, IndexBufferRAM& indexBufferLine, 
-        std::vector<BasicMesh::Vertex>& verticesLines);
+    void drawLineVertex(const float x, const float y, IndexBufferRAM& indexBufferLine,
+                        std::vector<BasicMesh::Vertex>& verticesLines);
 
-//Ports
+    // Ports
 public:
     /// Tree for which we compute the meshes
     TemporalTreeInport portInTree;
@@ -100,7 +97,7 @@ public:
     /// Mesh of the bands
     MeshOutport portOutMeshLines;
 
-//Properties
+    // Properties
 public:
     IntProperty propNumLeaves;
 
@@ -113,11 +110,10 @@ public:
     CompositeProperty propRenderInfo;
     BoolProperty propInterpretAsCoefficients;
 
-//Attributes
+    // Attributes
 private:
-
 };
 
-} // namespace kth
+}  // namespace kth
 
-} // namespace
+}  // namespace inviwo

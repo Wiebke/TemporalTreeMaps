@@ -10,26 +10,21 @@
 
 #include <modules/temporaltreemaps/processors/treeordercomputationsa.h>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
 // The Class Identifier has to be globally unique. Use a reverse DNS naming scheme
-const ProcessorInfo TemporalTreeSimulatedAnnealing::processorInfo_
-{
-    "org.inviwo.TemporalTreeSimulatedAnnealing",      // Class identifier
-    "Tree Simulated Annealing",                // Display name
-    "Temporal Tree",              // Category
-    CodeState::Experimental,  // Code state
-    Tags::None,               // Tags
+const ProcessorInfo TemporalTreeSimulatedAnnealing::processorInfo_{
+    "org.inviwo.TemporalTreeSimulatedAnnealing",  // Class identifier
+    "Tree Simulated Annealing",                   // Display name
+    "Temporal Tree",                              // Category
+    CodeState::Experimental,                      // Code state
+    Tags::None,                                   // Tags
 };
 
-const ProcessorInfo TemporalTreeSimulatedAnnealing::getProcessorInfo() const
-{
+const ProcessorInfo TemporalTreeSimulatedAnnealing::getProcessorInfo() const {
     return processorInfo_;
 }
-
 
 TemporalTreeSimulatedAnnealing::TemporalTreeSimulatedAnnealing()
     : TemporalTreeOrderOptimization()
@@ -40,8 +35,7 @@ TemporalTreeSimulatedAnnealing::TemporalTreeSimulatedAnnealing()
     , propTemperatureDecay("temperatureDecay", "T Decay", 0.9, 0.6, 0.99, 0.1)
     , propIterationsPerTemp("iterationsPerTemp", "Iters Per T", 10, 1, 1000, 1)
     // Current State
-    , propCurrentTemperature("currentTemperature", "Current T", 0, 0, 1000, 10e-6)
-{
+    , propCurrentTemperature("currentTemperature", "Current T", 0, 0, 1000, 10e-6) {
     /* Settings */
 
     propSettings.addProperty(propSimulatedAnnealing);
@@ -51,7 +45,7 @@ TemporalTreeSimulatedAnnealing::TemporalTreeSimulatedAnnealing()
     propInitialTemperature.setSemantics(PropertySemantics::Text);
 
     propSimulatedAnnealing.addProperty(propMinimumTemperature);
-    //propMinimumTemperature.onChange([&]() { restart(); });
+    // propMinimumTemperature.onChange([&]() { restart(); });
     propMinimumTemperature.setSemantics(PropertySemantics::Text);
 
     propSimulatedAnnealing.addProperty(propTemperatureDecay);
@@ -68,51 +62,45 @@ TemporalTreeSimulatedAnnealing::TemporalTreeSimulatedAnnealing()
     propCurrentTemperature.setReadOnly(true);
 }
 
-void TemporalTreeSimulatedAnnealing::swapNodes(std::vector<size_t>& nodes)
-{
+void TemporalTreeSimulatedAnnealing::swapNodes(std::vector<size_t>& nodes) {
     std::uniform_int_distribution<int> chooseSwapNodes(0, static_cast<int>(nodes.size()) - 1);
     // We have at least two nodes, so we can definately find a pair of nodes to swap
     int swapA = chooseSwapNodes(randomGen);
     int swapB = chooseSwapNodes(randomGen);
 
-    while (swapA == swapB)
-    {
+    while (swapA == swapB) {
         swapB = chooseSwapNodes(randomGen);
     }
 
-    //LogInfo("Swapped positions " << swapA << " and " << swapB << ".");
+    // LogInfo("Swapped positions " << swapA << " and " << swapB << ".");
     std::swap(nodes[swapA], nodes[swapB]);
 }
 
-void TemporalTreeSimulatedAnnealing::decayTemperature()
-{
+void TemporalTreeSimulatedAnnealing::decayTemperature() {
     // Exponential multiplicative cooling: 0.8 <= temperatureDecay <= 0.9
     currentTemperature *= propTemperatureDecay;
 
     // Others:
     // Logarithmical multiplicative cooling: temperatureDecay > 1
-    // currentTemperature = initialTemperature / 1 + temperatureDecay*(log(1 + currentIteration + 1));
+    // currentTemperature = initialTemperature / 1 + temperatureDecay*(log(1 + currentIteration +
+    // 1));
     // ... (7 or so others)
     propCurrentTemperature.set(currentTemperature);
 }
 
-bool TemporalTreeSimulatedAnnealing::acceptNeighbor(double deltaEnergy) const
-{
+bool TemporalTreeSimulatedAnnealing::acceptNeighbor(double deltaEnergy) const {
     // If the new Energy is better or equal we accept it (Boltzmann/Metropolis critera)
-    if (!(deltaEnergy <= 0))
-    {
+    if (!(deltaEnergy <= 0)) {
         // For positive \Delta E the following holds:
-        // \lim_{T \rightarrow 0} \exp\left(\frac{-\Delta E}{T}\right) = \lim_{x \rightarrow -\infty} \exp(x) = 0
-        // and
-        // \lim_{T \rightarrow \infty} \exp\left(-\frac{\Delta E}{T}\right) = \lim_{x \rightarrow 0} \exp(x) = 1
-        // this means if we want the initial probability to accept close to 1
-        // then
+        // \lim_{T \rightarrow 0} \exp\left(\frac{-\Delta E}{T}\right) = \lim_{x \rightarrow
+        // -\infty} \exp(x) = 0 and \lim_{T \rightarrow \infty} \exp\left(-\frac{\Delta E}{T}\right)
+        // = \lim_{x \rightarrow 0} \exp(x) = 1 this means if we want the initial probability to
+        // accept close to 1 then
         const double probabilityThreshold =
             currentTemperature > 0 ? std::exp(-(deltaEnergy) / currentTemperature) : -1.0;
         // Do not accept the solution
         const double probability = uniformReal(randomGen);
-        if (probability > probabilityThreshold)
-        {
+        if (probability > probabilityThreshold) {
             return false;
         }
     }
@@ -122,54 +110,34 @@ bool TemporalTreeSimulatedAnnealing::acceptNeighbor(double deltaEnergy) const
     return true;
 }
 
-void TemporalTreeSimulatedAnnealing::logProperties()
-{
+void TemporalTreeSimulatedAnnealing::logProperties() {
     const std::vector<std::string> colHeaders{
-		propSeedOrder.getDisplayName(),
-        propSeedOptimization.getDisplayName(),
-        propIterationsMax.getDisplayName(),
-        propInitialTemperature.getDisplayName(),
-        propMinimumTemperature.getDisplayName(),
-        propTemperatureDecay.getDisplayName(),
-        propIterationsPerTemp.getDisplayName(),
-        propWeightByTypeOnly.getDisplayName(),
-        propWeightTypeOnly.getDisplayName(),
-        propBestIteration.getDisplayName(),
-        propObjectiveValue.getDisplayName(),
-        propTimeUntilBest.getDisplayName(),
-        propTimeForLastAction.getDisplayName() };
+        propSeedOrder.getDisplayName(),          propSeedOptimization.getDisplayName(),
+        propIterationsMax.getDisplayName(),      propInitialTemperature.getDisplayName(),
+        propMinimumTemperature.getDisplayName(), propTemperatureDecay.getDisplayName(),
+        propIterationsPerTemp.getDisplayName(),  propWeightByTypeOnly.getDisplayName(),
+        propWeightTypeOnly.getDisplayName(),     propBestIteration.getDisplayName(),
+        propObjectiveValue.getDisplayName(),     propTimeUntilBest.getDisplayName(),
+        propTimeForLastAction.getDisplayName()};
 
     const std::vector<std::string> exampleRow{
-		std::to_string(propSeedOrder),
-        std::to_string(propSeedOptimization),
-        std::to_string(propIterationsMax),
-        std::to_string(propInitialTemperature),
-        std::to_string(propMinimumTemperature),
-        std::to_string(propTemperatureDecay),
-        std::to_string(propIterationsPerTemp),
-        std::to_string(propWeightByTypeOnly),
-        std::to_string(propWeightTypeOnly),
-		std::to_string(bestState.iteration),
-		std::to_string(bestState.value),
-        std::to_string(propTimeUntilBest),
-        std::to_string(propTimeForLastAction) };
+        std::to_string(propSeedOrder),          std::to_string(propSeedOptimization),
+        std::to_string(propIterationsMax),      std::to_string(propInitialTemperature),
+        std::to_string(propMinimumTemperature), std::to_string(propTemperatureDecay),
+        std::to_string(propIterationsPerTemp),  std::to_string(propWeightByTypeOnly),
+        std::to_string(propWeightTypeOnly),     std::to_string(bestState.iteration),
+        std::to_string(bestState.value),        std::to_string(propTimeUntilBest),
+        std::to_string(propTimeForLastAction)};
 
-    optimizationSettings = createDataFrame({ exampleRow }, colHeaders);
+    optimizationSettings = createDataFrame({exampleRow}, colHeaders);
     optimizationSettings->addRow(exampleRow);
 }
 
-void TemporalTreeSimulatedAnnealing::initializeLog()
-{
+void TemporalTreeSimulatedAnnealing::initializeLog() {
     const std::vector<std::string> colHeaders{
-        "Iteration",
-        "Temperature",
-        "Energy",
-        "Delta Energy",
-        "Accept Propabilty",
-        "Accepted",
-        "Unfulfilled Merge",
-        "Unfulfilled Hierarchy",
-        "Unfulfilled Total", 
+        "Iteration",         "Temperature",           "Energy",
+        "Delta Energy",      "Accept Propabilty",     "Accepted",
+        "Unfulfilled Merge", "Unfulfilled Hierarchy", "Unfulfilled Total",
         "Unhappy leaves"};
 
     const std::vector<std::string> exampleRow{
@@ -184,60 +152,58 @@ void TemporalTreeSimulatedAnnealing::initializeLog()
         std::to_string(numConstraintsHierarchy),
         std::to_string(currentState.statistic.unhappyLeaves.size())};
 
-    optimizationStatistics = createDataFrame({ exampleRow }, colHeaders);
+    optimizationStatistics = createDataFrame({exampleRow}, colHeaders);
 }
 
-void TemporalTreeSimulatedAnnealing::logStep()
-{
-	if (!optimizationStatistics) return;
+void TemporalTreeSimulatedAnnealing::logStep() {
+    if (!optimizationStatistics) return;
 
     bool firstRow = optimizationStatistics->getNumberOfRows() == 0;
-    
-    size_t numUnfulfilledMergeSplit = numConstraintsMergeSplit - currentState.statistic.numFulFilledMergeSplitConstraints();
-    size_t numUnfulfilledHierarchy = numConstraintsHierarchy - currentState.statistic.numFulfilledHierarchyConstraints();
+
+    size_t numUnfulfilledMergeSplit =
+        numConstraintsMergeSplit - currentState.statistic.numFulFilledMergeSplitConstraints();
+    size_t numUnfulfilledHierarchy =
+        numConstraintsHierarchy - currentState.statistic.numFulfilledHierarchyConstraints();
 
     std::vector<std::string> newRow{
-        std::to_string(int(currentState.iteration) - 1), //"Iteration"
-        std::to_string(currentTemperature), //"Current Temperature",
-        std::to_string(currentState.value), //"Current Value",
-        std::to_string(lastDeltaEnergy), // "Delta Energy"
-        std::to_string((currentTemperature > 0) ? (std::exp(-(lastDeltaEnergy) / currentTemperature)) : -1.0), //"Accept Propabilty"
-        std::to_string(lastAccepted), // State was accepted
+        std::to_string(int(currentState.iteration) - 1),  //"Iteration"
+        std::to_string(currentTemperature),               //"Current Temperature",
+        std::to_string(currentState.value),               //"Current Value",
+        std::to_string(lastDeltaEnergy),                  // "Delta Energy"
+        std::to_string((currentTemperature > 0)
+                           ? (std::exp(-(lastDeltaEnergy) / currentTemperature))
+                           : -1.0),    //"Accept Propabilty"
+        std::to_string(lastAccepted),  // State was accepted
         std::to_string(firstRow ? numConstraintsMergeSplit : numUnfulfilledMergeSplit),
         std::to_string(firstRow ? numConstraintsHierarchy : numUnfulfilledHierarchy),
-        std::to_string(firstRow ? numConstraintsHierarchy + numConstraintsMergeSplit : numUnfulfilledMergeSplit + numUnfulfilledHierarchy),
-        std::to_string(currentState.statistic.unhappyLeaves.size())
-    };
-        
+        std::to_string(firstRow ? numConstraintsHierarchy + numConstraintsMergeSplit
+                                : numUnfulfilledMergeSplit + numUnfulfilledHierarchy),
+        std::to_string(currentState.statistic.unhappyLeaves.size())};
+
     optimizationStatistics->addRow(newRow);
 }
 
-void TemporalTreeSimulatedAnnealing::restart()
-{
+void TemporalTreeSimulatedAnnealing::restart() {
 
-	TemporalTreeOrderOptimization::restart();
+    TemporalTreeOrderOptimization::restart();
 
     currentTemperature = propInitialTemperature;
     propCurrentTemperature.set(currentTemperature);
 
-	logStep();
+    logStep();
 }
 
-bool TemporalTreeSimulatedAnnealing::isConverged()
-{
+bool TemporalTreeSimulatedAnnealing::isConverged() {
     // the iteration number is an index starting at 0, the max is a number >= -1
-    if (currentState.iteration > propIterationsMax - 1)
-    {
+    if (currentState.iteration > propIterationsMax - 1) {
         LogProcessorInfo("Converged by reaching maximum number of iterations.");
         return true;
     }
-    if (currentTemperature < propMinimumTemperature)
-    {
+    if (currentTemperature < propMinimumTemperature) {
         LogProcessorInfo("Converged by temperature falling below the minimum.");
         return true;
     }
-    if (std::abs(currentState.value) < std::numeric_limits<float>::epsilon())
-    {
+    if (std::abs(currentState.value) < std::numeric_limits<float>::epsilon()) {
         LogProcessorInfo("Converged by reaching a global optimum.");
         return true;
     }
@@ -246,18 +212,16 @@ bool TemporalTreeSimulatedAnnealing::isConverged()
     return false;
 }
 
-void TemporalTreeSimulatedAnnealing::singleStep()
-{
-	if (isConverged())
-	{
-		return;
-	}
+void TemporalTreeSimulatedAnnealing::singleStep() {
+    if (isConverged()) {
+        return;
+    }
 
     setLastToCurrent();
 
     // Generate a neighbor state (Changes current State)
     neighborSolution();
-    
+
     // Evaluate new state
     currentState.statistic.clear();
     currentState.value = evaluateOrder(currentState.order, &currentState.statistic);
@@ -265,20 +229,16 @@ void TemporalTreeSimulatedAnnealing::singleStep()
     lastDeltaEnergy = currentState.value - lastState.value;
 
     // Check if we can accept the new solution
-    if (!acceptNeighbor(currentState.value - lastState.value))
-    {
+    if (!acceptNeighbor(currentState.value - lastState.value)) {
         // Go back to the previous state
         setCurrentToLast();
         lastAccepted = false;
-    }
-    else
-    {
+    } else {
         // Prepare the next step
         prepareNextStep();
-        
+
         // Update best
-        if (currentState.value < bestState.value)
-        {
+        if (currentState.value < bestState.value) {
             propTimeUntilBest.set(performanceTimer.ElapsedTime());
             setBest();
         }
@@ -291,21 +251,16 @@ void TemporalTreeSimulatedAnnealing::singleStep()
     logStep();
 
     // Decay temperature after we have done the specified number of iterations
-    if (currentState.iteration % propIterationsPerTemp == 0)
-    {
+    if (currentState.iteration % propIterationsPerTemp == 0) {
         decayTemperature();
     }
-
 }
 
-void TemporalTreeSimulatedAnnealing::runUntilConvergence()
-{
-    while (!isConverged())
-    {
+void TemporalTreeSimulatedAnnealing::runUntilConvergence() {
+    while (!isConverged()) {
         singleStep();
     }
 }
 
-} // namespace
-} // namespace
-
+}  // namespace kth
+}  // namespace inviwo

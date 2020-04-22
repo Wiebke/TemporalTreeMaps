@@ -15,55 +15,48 @@
 #include <modules/base/processors/datasource.h>
 #include <modules/temporaltreemaps/datastructures/treeport.h>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
 /** \docpage{org.inviwo.TemporalTreeSource, Tree Source}
     ![](org.inviwo.TemporalTreeSource.png?classIdentifier=org.inviwo.TemporalTreeSource)
 
     Loads a tree.
-    
+
     ### Outports
       * __Outport__ The loaded tree.
-    
+
     ### Properties
       * __File name__ File to load.
 */
 
-
 /** \class TemporalTreeSource
     \brief Loads a Tree.
-    
+
     @author Tino Weinkauf and Wiebke Köpp
 */
-class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeSource : public DataSource<TemporalTree, TemporalTreeOutport>
-{ 
-//Friends
-//Types
+class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeSource
+    : public DataSource<TemporalTree, TemporalTreeOutport> {
+    // Friends
+    // Types
 public:
-
-//Construction / Deconstruction
+    // Construction / Deconstruction
 public:
     TemporalTreeSource();
     virtual ~TemporalTreeSource() = default;
 
-//Methods
+    // Methods
 public:
     virtual const ProcessorInfo getProcessorInfo() const override;
     static const ProcessorInfo processorInfo_;
 
-//Ports
+    // Ports
 public:
-
-//Properties
+    // Properties
 public:
-
-//Attributes
+    // Attributes
 private:
-
 };
 
-} // namespace kth
-} // namespace
+}  // namespace kth
+}  // namespace inviwo

@@ -1,4 +1,5 @@
 /*********************************************************************
+/*********************************************************************
  *  Author  : Tino Weinkauf and Wiebke Köpp
  *  Init    : Monday, October 09, 2017 - 16:06:40
  *
@@ -30,84 +31,80 @@
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
 /** \docpage{org.inviwo.TemporalTreeWriter, Tree Writer}
     ![](org.inviwo.TemporalTreeWriter.png?classIdentifier=org.inviwo.TemporalTreeWriter)
 
     Writes a tree to disk.
-    
+
     ### Inports
       * __<Inport1>__ <description>.
-    
+
     ### Outports
       * __<Outport1>__ <description>.
-    
+
     ### Properties
       * __<Prop1>__ <description>.
       * __<Prop2>__ <description>
 */
 
-
 /** \class TemporalTreeWriter
     \brief Writes a simple text file containing a tree structure.
-    
+
     @author Tino Weinkauf and Wiebke Köpp
 */
-class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeWriter : public Processor
-{ 
-//Friends
-//Types
+class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeWriter : public Processor {
+    // Friends
+    // Types
 public:
-
-//Construction / Deconstruction
+    // Construction / Deconstruction
 public:
     TemporalTreeWriter();
     virtual ~TemporalTreeWriter() = default;
 
-//Methods
+    // Methods
 public:
     virtual const ProcessorInfo getProcessorInfo() const override;
     static const ProcessorInfo processorInfo_;
 
-    static json createJSON(std::shared_ptr<const TemporalTree> tree, const bool bNTG, const bool bNTGAddWeights, const bool bNTGAddOrder, double nTGScaleWeights);
+    static json createJSON(std::shared_ptr<const TemporalTree> tree, const bool bNTG,
+                           const bool bNTGAddWeights, const bool bNTGAddOrder,
+                           double nTGScaleWeights);
 
 protected:
-    ///Our main computation function
+    /// Our main computation function
     virtual void process() override;
 
-//Ports
+    // Ports
 public:
-    ///Tree to be written to disk.
+    /// Tree to be written to disk.
     TemporalTreeInport portInTree;
 
-//Properties
+    // Properties
 public:
-    ///Filename of the tree file.
+    /// Filename of the tree file.
     FileProperty propFilename;
 
-    ///Whether to pretty-print the output
+    /// Whether to pretty-print the output
     BoolProperty propPrettyPrint;
 
-    ///Wheter we can overwrite the output file
+    /// Wheter we can overwrite the output file
     BoolProperty propOverwrite;
 
-    ///Whether to add the weights to the NTG output
+    /// Whether to add the weights to the NTG output
     BoolProperty propNTGAddWeights;
 
-    ///Whether to add the order to the NTG output
+    /// Whether to add the order to the NTG output
     BoolProperty propNTGAddOrder;
 
-    ///Scale the weights for NTG output
+    /// Scale the weights for NTG output
     DoubleProperty propNTGScaleWeights;
 
-//Attributes
+    // Attributes
 private:
-
 };
 
-} // namespace kth
-} // namespace
+}  // namespace kth
+}  // namespace inviwo

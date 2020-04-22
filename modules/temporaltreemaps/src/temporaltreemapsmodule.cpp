@@ -34,19 +34,17 @@
 #include <modules/temporaltreemaps/processors/treeordercomputationgreedy.h>
 #include <modules/temporaltreemaps/processors/ntgrenderer.h>
 
-
-namespace inviwo
-{
+namespace inviwo {
 
 using namespace kth;
-    
-TemporalTreeMapsModule::TemporalTreeMapsModule(InviwoApplication* app) : InviwoModule(app, "TemporalTreeMaps")
-{
+
+TemporalTreeMapsModule::TemporalTreeMapsModule(InviwoApplication* app)
+    : InviwoModule(app, "TemporalTreeMaps") {
     // Add a directory to the search path of the Shadermanager
     ShaderManager::getPtr()->addShaderSearchPath(getPath(ModulePath::GLSL));
 
     // Register objects that can be shared with the rest of inviwo here:
-    
+
     // Processors
     registerProcessor<TemporalTreeWriter>();
     registerProcessor<TemporalTreeSource>();
@@ -69,20 +67,19 @@ TemporalTreeMapsModule::TemporalTreeMapsModule(InviwoApplication* app) : InviwoM
     registerProcessor<TemporalTreeOrderComputationSANodes>();
     registerProcessor<TemporalTreeOrderComputationGreedy>();
     registerProcessor<NTGRenderer>();
-    
+
     // Properties
     // registerProperty<modules/temporaltreemapsProperty>();
-    
+
     // Readers and writes
     registerDataReader(util::make_unique<TemporalTreeJSONReader>());
     registerDataReader(util::make_unique<TemporalTreeJSONReaderCBOR>());
     registerDataReader(util::make_unique<TemporalTreeJSONReaderMsgPack>());
     registerDataReader(util::make_unique<TemporalTreeJSONReaderNTG>());
-   
 
     // Ports
     registerPort<TemporalTreeOutport>();
     registerPort<TemporalTreeInport>();
 }
 
-} // namespace
+}  // namespace inviwo

@@ -22,64 +22,59 @@
 #include <inviwo/core/util/colorbrewer.h>
 #include <random>
 
-namespace inviwo
-{
-namespace kth
-{
+namespace inviwo {
+namespace kth {
 
 /** \docpage{org.inviwo.TemporalTreeColoring, Tree Coloring}
     ![](org.inviwo.TemporalTreeColoring.png?classIdentifier=org.inviwo.TemporalTreeColoring)
 
     Explanation of how to use the processor.
-    
+
     ### Inports
       * __<Inport1>__ <description>.
-    
+
     ### Outports
       * __<Outport1>__ <description>.
-    
+
     ### Properties
       * __<Prop1>__ <description>.
       * __<Prop2>__ <description>
 */
 
-
 /** \class TemporalTreeColoring
     \brief VERY_BRIEFLY_DESCRIBE_THE_PROCESSOR
-    
+
     DESCRIBE_THE_PROCESSOR_FROM_A_DEVELOPER_PERSPECTIVE
 
     @author Tino Weinkauf and Wiebke Koepp
 */
-class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeColoring : public Processor
-{ 
-//Friends
-//Types
+class IVW_MODULE_TEMPORALTREEMAPS_API TemporalTreeColoring : public Processor {
+    // Friends
+    // Types
 public:
-
-//Construction / Deconstruction
+    // Construction / Deconstruction
 public:
     TemporalTreeColoring();
     virtual ~TemporalTreeColoring() = default;
 
-//Methods
+    // Methods
 public:
     virtual const ProcessorInfo getProcessorInfo() const override;
     static const ProcessorInfo processorInfo_;
 
 protected:
-    ///Our main computation function
+    /// Our main computation function
     virtual void process() override;
 
     float rand(const float min, const float max) const;
 
-//Ports
+    // Ports
 public:
     TemporalTreeInport portInTree;
 
     TemporalTreeOutport portOutTree;
 
-//Properties
+    // Properties
 public:
     OptionPropertyInt propColorScheme;
 
@@ -100,11 +95,11 @@ public:
     FloatProperty propSaturationMin;
     FloatProperty propSaturationMax;
 
-//Attributes
+    // Attributes
 private:
     mutable std::mt19937 randomGen;
     mutable std::uniform_real_distribution<float> randomDis;
 };
 
-} // namespace kth
-} // namespace
+}  // namespace kth
+}  // namespace inviwo
