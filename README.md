@@ -10,16 +10,17 @@ Temporal Treemaps have been implemented in [Inviwo](https://inviwo.org/). The se
 
 | Dependency | Windows (64 bit) | Linux | OSX|
 | --- | --- | --- | --- |
-| Git | [.exe](https://github.com/git-for-windows/git/releases/download/v2.15.1.windows.2/Git-2.15.1.2-64-bit.exe)  |  `sudo apt-get install git ` | [.dmg](https://sourceforge.net/projects/git-osx-installer/files/git-2.15.1-intel-universal-mavericks.dmg/download?use_mirror=autoselect)
-| CMake  | [.msi](https://cmake.org/files/v3.10/cmake-3.10.1-win64-x64.msi)  |  `sudo apt-get install cmake cmake-qt-gui ` | [.dmg](https://cmake.org/files/v3.10/cmake-3.10.2-Darwin-x86_64.dmg)
-| Qt  | [.exe](http://download.qt.io/official_releases/qt/5.9/5.9.3/qt-opensource-windows-x86-5.9.3.exe)<sup>1</sup> | [Qt 5 Install instructions](https://wiki.qt.io/Install_Qt_5_on_Ubuntu)<sup>2</sup> | [.dmg](http://download.qt.io/official_releases/qt/5.9/5.9.3/qt-opensource-mac-x64-5.9.3.dmg)<sup>1</sup>
-| C++ | [Visual Studio Website](https://visualstudio.microsoft.com/) | `sudo apt-get install build-essential` | [XCode Website](https://developer.apple.com/xcode/)
+| Git | [.exe](https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/Git-2.23.0-64-bit.exe)  |  `sudo apt-get install git ` | [.dmg](https://sourceforge.net/projects/git-osx-installer/files/git-2.22.0-intel-universal-mavericks.dmg/download?use_mirror=autoselect)
+| CMake >= 3.12  | [.msi](https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2-win64-x64.msi)  |  `sudo apt-get install cmake cmake-qt-gui ` | [.dmg](https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2-Darwin-x86_64.dmg)
+| Qt >= 5.12   | [.exe](http://download.qt.io/official_releases/qt/5.12/5.12.4/qt-opensource-windows-x86-5.12.4.exe)<sup>1</sup> | [Qt 5 Install instructions](https://wiki.qt.io/Install_Qt_5_on_Ubuntu)<sup>2</sup> | [.dmg](http://download.qt.io/official_releases/qt/5.12/5.12.4/qt-opensource-mac-x64-5.12.4.dmg)<sup>1</sup>
+| C++(17) | [Visual Studio Website](https://visualstudio.microsoft.com/) | `sudo apt-get install build-essential` | [XCode Website](https://developer.apple.com/xcode/)
 
 <sup>1</sup> Select the version for the correct C++ compiler.  
-<sup>2</sup> The given download path is outdated. Use a newer version number, e.g. 5.9.3.
+<sup>2</sup> The given download path is outdated. Use a newer version number, e.g. 5.12.4.
 
 * Install the dependencies above.
-* Clone this repository and the [Inviwo repository](https://github.com/inviwo/inviwo).
+* Clone this repository and the [Inviwo repository](https://github.com/inviwo/inviwo). 
+* This code in this repository was last tested with Inviwo version [v0.9.11](https://github.com/inviwo/inviwo/releases/tag/v0.9.11) which can be selected with `git checkout v0.9.11`
 * Run `git submodule sync --recursive` and `git submodule update --init --recursive` within the local Inviwo copy.
 * Generate project files using CMake:
   * Set source and binary destination path.
