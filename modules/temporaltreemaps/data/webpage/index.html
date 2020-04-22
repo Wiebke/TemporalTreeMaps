@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xml:lang='en' lang='en'>
+<head>
+    <title>Nested Tracking Graphs</title>
+</head>
+<script src='d3.min.js'></script>
+<script src='viz.js'></script>
+<script src='NestedGraphLib.js'></script>
+<script src='exampleGraphs.js'></script>
+<body>
+<p>
+    Example:
+    <select id='exampleGraphs' onchange='selectGraph()'>
+        <option>Simple</option>
+        <option>Viscous_Fingers</option>
+    </select>
+    <span id='loadingText'></span>
+</p>
+<div id='container' style='height:400px;'></div>
+<script>
+    var selectField = document.getElementById('exampleGraphs');
+    var loadingText = document.getElementById('loadingText');
+    function selectGraph() {
+        loadingText.innerHTML = 'Loading';
+
+        setTimeout(
+            function(){
+                var selection = selectField.options[selectField.selectedIndex].text;
+                var settings = exampleGraphsSettings[selection];
+                for(var setting in settings){
+                    NestedGraphLib[setting] = settings[setting];
+                }
+                NestedGraphLib.drawNestedGraph( exampleGraphs[selection] , 'container');
+                loadingText.innerHTML = '';
+            },
+            0
+        );
+    }
+    selectGraph();
+</script>
+</div>
+</body>
+
+
+</html>
