@@ -1,0 +1,210 @@
+<html>
+<head>
+<title>Nested Tracking Graph</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="d3.min.js"></script>
+<script src="viz.js"></script>
+<script src="nestedGraphLib.js"></script>
+
+<!-- https://inviwo/modules/yourmodulename will be rediredcted to the module directory on the harddrive -->
+<script src="https://inviwo/modules/webbrowser/data/js/inviwoapi.js"></script>
+
+<script language="JavaScript">
+// Initialize Inviwo API so that we can use it to synchronize properties
+var inviwo = new InviwoAPI();
+</script>
+
+</head>
+<body>
+
+<div class="slidecontainer">
+  <p style="display:none">X Scale<input type="range" min="0" max="5" value="1" step="0.001" class="slider" id="xScale">
+  <span id="sliderValueX"></span></p>
+</div>
+
+<div class="slidecontainer">
+  <p style="display:none">Y Scale<input type="range" min="0" max="5" value="1" step="0.001" class="slider" id="yScale">
+  <span id="sliderValueY"></span></p>
+</div>
+
+<div class="slidecontainer">
+  <p style="display:none">W Scale<input type="range" min="0" max="1" value="1" step="0.001" class="slider" id="wScale">
+  <span id="sliderValueW"></span></p>
+</div>
+
+<div class="slidecontainer">
+  <p style="display:none">W Scale<input type="range" min="0" max="1" value="1" step="0.001" class="slider" id="wScale">
+  <span id="sliderValueW"></span></p>
+</div>
+
+<div class="slidecontainer">
+  <p style="display:none">Dim X<input type="range" min="0" max="2000" value="400" step="1" class="slider" id="dimX">
+  <span id="sliderValueDimX"></span></p>
+</div>
+
+<div class="slidecontainer">
+  <p style="display:none">Dim Y<input type="range" min="0" max="2000" value="800" step="1" class="slider" id="dimY">
+  <span id="sliderValueDimY"></span></p>
+</div>
+
+<p style="display:none">Colormap <select id="colormap" onchange="updateColormap(this.selectedIndex)"></p>
+
+<p style="display:none">Classic Layout <input type="checkbox" value="Force Classic Layout" id="forceClassic" onchange="checkboxInput(this.checked)"></p>
+<p style="display:none">Tree String <input type="text" id="treeString" value='{"N":{"A":{"l":2,"t":0},"B":{"l":1,"t":0},"C":{"l":0,"t":0},"D":{"l":2,"t":1},"E":{"l":2,"t":1},"F":{"l":1,"t":1},"G":{"l":0,"t":1},"H":{"l":2,"t":2},"I":{"l":1,"t":2},"J":{"l":0,"t":2},"K":{"l":0,"t":2}},"ET":{"0":{"C":["G"],"G":["J","K"]},"1":{"B":["F"],"F":["I"]},"2":{"A":["D","E"],"D":["H"],"E":["H"]}},"EN":{"0":{"B":["A"],"C":["B"]},"1":{"G":["F"],"F":["D","E"]},"2":{"J":["I"],"I":["H"]}}}'></p>
+<p style="display:none">SVG String <textarea id="svgString" onchange="updateSvgString(this.value)"></textarea></p>
+
+<div id="container"></div>
+<pre id="log"></pre>
+
+<script language="JavaScript">
+// For debugging in a regular browser
+if( (typeof window.cefQuery)!='function'){
+	window.cefQuery = function(){};
+}
+
+colormap = document.getElementById("colormap")
+
+function updateGraph() {
+    setTimeout(
+        function(){
+        	var graph = JSON.parse(document.getElementById("treeString").value);
+        	var selectedColorMap = '6-class YlOrRd';
+        	if (colormap.selectedIndex >= 0){
+        		selectedColorMap = colormap.options[colormap.selectedIndex].text;
+        	}
+			var settings = {
+				xScale: document.getElementById("xScale").value,
+			    yScale: document.getElementById("yScale").value,
+			    wScale: document.getElementById("wScale").value,
+			    currentColorMap: selectedColorMap
+			};
+            var bForceNewLayout = document.getElementById('forceClassic').checked;
+            for(var setting in settings){
+                NestedGraphLib[setting] = settings[setting];
+            }
+            NestedGraphLib.drawNestedGraph(graph , 'container', bForceNewLayout);
+        },
+        0
+    );
+	updateSvgString()
+}
+
+function checkboxInput(val) {
+	inviwo.setProperty('NTGRenderer.forceClassic', {value: val})
+	updateGraph();
+}
+
+function updateColormap(val) {
+	if (val >= 0) { 
+		inviwo.setProperty('NTGRenderer.colorBrewerScheme', {selectedIndex: Number(val)}); 
+	}
+	updateGraph();
+}
+
+function updateSvgString(val) {
+	// Update SVG Output
+	var svgElement = document.getElementById("container");
+	var svgStringData = $(svgElement).html() 
+	document.getElementById("svgString").value = svgStringData;
+	document.getElementById("svgString").focus();
+	inviwo.setProperty('NTGRenderer.svgString', {value: svgStringData})
+}
+
+var sliderDimX = document.getElementById("dimX");
+var sliderValueDimX = document.getElementById("sliderValueDimX");
+sliderValueDimX.innerHTML = sliderDimX.value;
+
+var sliderDimY = document.getElementById("dimY");
+var sliderValueDimY = document.getElementById("sliderValueDimY");
+sliderValueDimY.innerHTML = sliderDimY.value;
+
+var sliderX = document.getElementById("xScale");
+var sliderValueX = document.getElementById("sliderValueX");
+sliderValueX.innerHTML = sliderX.value;
+
+var sliderY = document.getElementById("yScale");
+var sliderValueY = document.getElementById("sliderValueY");
+sliderValueY.innerHTML = sliderY.value;
+
+var sliderW = document.getElementById("wScale");
+var sliderValueW = document.getElementById("sliderValueW");
+sliderValueW.innerHTML = sliderW.value;
+
+var colormap = document.getElementById("colormap");
+
+// Change Inviwo property when slider changes
+sliderX.oninput = function() {
+	inviwo.setProperty("NTGRenderer.xScale", {value: Number(this.value)});
+    sliderValueX.innerHTML = this.value;
+    updateGraph()
+}
+sliderY.oninput = function() {
+	inviwo.setProperty("NTGRenderer.yScale", {value: Number(this.value)});
+    sliderValueY.innerHTML = this.value;
+    updateGraph()
+}
+sliderW.oninput = function() {
+	inviwo.setProperty("NTGRenderer.wScale", {value: Number(this.value)});
+    sliderValueW.innerHTML = this.value;
+    updateGraph()
+}
+
+// Callbacks that will be called when a property changes, need to be in global scope.
+function syncOrdinalX(prop) { 
+	inviwo.syncRange("xScale", prop); 
+	sliderValueX.innerHTML = prop.value;
+	updateGraph();
+}
+function syncOrdinalY(prop) { 
+	inviwo.syncRange("yScale", prop); 
+	sliderValueY.innerHTML = prop.value;
+	updateGraph();
+}
+function syncOrdinalW(prop) { 
+	inviwo.syncRange("wScale", prop); 
+	sliderValueW.innerHTML = prop.value;
+	updateGraph();
+} 
+function syncCheckbox(prop) { 
+	inviwo.syncCheckbox("forceClassic", prop); 
+	updateGraph();
+}
+function syncTreeString(prop) { 
+	inviwo.syncStringInput("treeString", prop); 
+	updateGraph();
+} 
+function syncDimX(prop) { 
+	inviwo.syncRange("dimX", prop); 
+	sliderValueDimX.innerHTML = prop.value;
+	container = document.getElementById("container").style.width = Math.round(Number(prop.value)*0.9) + "px";
+	updateGraph();
+}
+function syncDimY(prop) { 
+	inviwo.syncRange("dimY", prop); 
+	sliderValueDimY.innerHTML = prop.value;
+	container = document.getElementById("container").style.height = Math.round(Number(prop.value)*0.9) + "px";
+	updateGraph();
+}
+function syncColor(prop) { 
+	inviwo.syncOption("colormap", prop); 
+	colormap.value = prop.value;
+	updateGraph();
+}
+
+
+// Update html inputs when corresponding Inviwo properties change
+// The supplied callbacks must be declared in global scope.
+inviwo.subscribe("NTGRenderer.xScale", syncOrdinalX);
+inviwo.subscribe("NTGRenderer.yScale", syncOrdinalY);
+inviwo.subscribe("NTGRenderer.svgX", syncDimX);
+inviwo.subscribe("NTGRenderer.svgY", syncDimY);
+inviwo.subscribe("NTGRenderer.wScale", syncOrdinalW);
+inviwo.subscribe("NTGRenderer.forceClassic", syncCheckbox);
+inviwo.subscribe("NTGRenderer.treeString", syncTreeString);
+inviwo.subscribe("NTGRenderer.colorBrewerScheme", syncColor);
+
+updateGraph();
+</script>
+
+</body>
+</html>
