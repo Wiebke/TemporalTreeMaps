@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<meta charset='utf-8'>
 <html xml:lang='en' lang='en'>
 <head>
     <title>Nested Tracking Graphs</title>
@@ -11,14 +12,21 @@
 <p>
     Example:
     <select id='exampleGraphs' onchange='selectGraph()'>
+
         <option>Simple</option>
-        <option>Viscous_Fingers</option>
+        <option>SimpleBubbles</option>
+        <option>Crossing</option>
+        <option>ViscousFingers</option>
+        <option>VisciousFingers_40to47_Ordered</option>
+        <option>OkuboWeiss_Ordered</option>
     </select>
+    <input type='checkbox' id='ForceClassicLayout' name='ForceClassicLayout' value='ForceLayout' onchange='selectGraph()'> Force Classic Layout
     <span id='loadingText'></span>
 </p>
-<div id='container' style='height:400px;'></div>
+<div id="container" style='width:1490px; height:800px;'></div>
 <script>
     var selectField = document.getElementById('exampleGraphs');
+    var layoutBox = document.getElementById('ForceClassicLayout');
     var loadingText = document.getElementById('loadingText');
     function selectGraph() {
         loadingText.innerHTML = 'Loading';
@@ -26,11 +34,12 @@
         setTimeout(
             function(){
                 var selection = selectField.options[selectField.selectedIndex].text;
+                var bForceNewLayout = layoutBox.checked;
                 var settings = exampleGraphsSettings[selection];
                 for(var setting in settings){
                     NestedGraphLib[setting] = settings[setting];
                 }
-                NestedGraphLib.drawNestedGraph( exampleGraphs[selection] , 'container');
+                NestedGraphLib.drawNestedGraph( exampleGraphs[selection] , 'container', bForceNewLayout);
                 loadingText.innerHTML = '';
             },
             0
@@ -40,6 +49,5 @@
 </script>
 </div>
 </body>
-
 
 </html>

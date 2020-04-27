@@ -18,11 +18,13 @@ var NestedGraphLib = {
     // Some color maps from ColorBrewer (http://colorbrewer2.org/)
     colorMaps: {
         '3-class blue':['#3182bd', '#6baed6', '#9ecae1'],
+        '3-class green':['#31a354', '#a1d99b', '#e5f5e0'],
         '6-class YlOrRd':['#bd0026','#f03b20','#fd8d3c','#feb24c','#fed976','#ffffb2'],
-        '6-class YlGnBu':['#253494','#2c7fb8','#41b6c4','#7fcdbb','#c7e9b4','#ffffcc']
+        '6-class YlGnBu':['#253494','#2c7fb8','#41b6c4','#7fcdbb','#c7e9b4','#ffffcc'],
+        '6-class PuBuGn':['#f6eff7','#d0d1e6','#a6bddb','#67a9cf','#1c9099','#016c59']
     },
 
-    currentColorMap: '3-class blue',
+    currentColorMap: '6-class YlOrRd',
     wScale: 0.25, // component width scale
     xScale: 2,    // x-axis scale
     yScale: 1,    // y-axis scale
@@ -123,11 +125,103 @@ var NestedGraphLib = {
         return 'diGraph g {rankdir=LR;\n' + nodeString + '\n' + rankString + '\n' + edgeString + '\n}';
     },
 
+    // Convert the first layer of G to the dot-format
+    convertToDotMinimal: function(G){
+        var i,j, nodeLabel, time, level;
+        var nodes = G.N;
+        var trackingGraphs = G.ET;
+        var nestingTrees = G.EN;
+
+        /* DotFormat:
+            diGraph g {rankdir=LR;
+                + nodeString
+                + rankString
+                + edgeString
+            }
+        */
+        var rankString = '';
+        var nodeString = '';
+        var edgeString = '';
+
+        // Create a Rank for each Timestep
+        var ranks = {};
+        var nodesPerTime = {};
+
+        var sortFunctionBackupReverse = function(a,b){
+            return - G.N[a].layoutbackup.y + G.N[b].layoutbackup.y;
+        };
+
+        var minW = Infinity;
+        var maxW = -Infinity;
+
+        // Get all nodes in the first layer per timestep
+        for (var timeStep in G.EN) {
+            var nodesPerTimeStep = [];
+            for (var nodeLabel in G.N) {
+                var node = G.N[nodeLabel];
+                if (node.l == 0 && node.t == timeStep) {
+                    nodesPerTimeStep.push(nodeLabel);
+                    nodeString += nodeLabel + '[shape=box,fixedsize=true,height=' + node.w + '];\n';
+                    minW = Math.min(minW, node.w);
+                    maxW = Math.max(maxW, node.w);
+                }
+            }
+
+            nodesPerTimeStep = nodesPerTimeStep.sort(sortFunctionBackupReverse);
+            rankString += '{rank=same';
+
+            for (var i = 0; i < nodesPerTimeStep.length; i++){
+                if (i == 0) {
+                    rankString += ' ' + nodesPerTimeStep[i];
+                }
+                else {
+                    rankString += '->' + nodesPerTimeStep[i];
+                }
+            }
+
+            if (nodesPerTimeStep.length > 1) {
+                rankString += ' [style=invis]}\n';
+            }
+            else {
+                rankString += '}\n';
+            }
+        }
+
+
+        var minMaxRange = maxW - minW;
+
+        for(level in trackingGraphs){
+            if (level === "0") {
+                var trackingGraph = trackingGraphs[level];
+
+                // Add Edges of the Tracking Graph
+                for(var startNode in trackingGraph){
+                    var endNodes = trackingGraph[startNode];
+                    for(i=0,j=endNodes.length; i<j; i++){
+                        // The weight enforces that nodes of roughly the same size are on straight lines
+                        var weight = nodes[startNode].w/nodes[endNodes[i]].w;
+                        weight = weight<0.5 || weight>1.5 ? 0 : 1;
+                        if (nodes[startNode].w > 0.66*maxW && nodes[endNodes[i]].w > 0.66*maxW /*|| /*(weight>0.7 & weight<1.3)*/){
+                            weight = 2;
+                        }
+                        edgeString+=startNode+'->'+endNodes[i]+' [weight='+weight+'];\n';
+                    }
+                }
+            }
+        }
+
+        return 'diGraph g {rankdir=LR;\n' + 'nodesep=2;\n' +  nodeString + '\n' + rankString + '\n' + edgeString + '\n}';
+    },
+
     // Computes the initial layout for each edge set ET in G with GraphViz
     computeInitialLayout: function(G){
         var dotFormat = this.convertToDot(G);
         var nodes = G.N;
-        var dotLayout = Viz(dotFormat, { format: 'plain' }).split('\n');
+        //// Creates layout with
+        //// graph scalefactor width height
+        //// node name x y xsize ysize label style shape color fillcolor
+        //// where x and y are the center of the node
+        var dotLayout = Viz(dotFormat, { format: 'plain' , totalMemory: 32 * 1024 * 1024}).split('\n');
         for(var i in dotLayout){
             var line = dotLayout[i].split(' ');
             if(line[0] === 'node')
@@ -139,6 +233,54 @@ var NestedGraphLib = {
         }
     },
 
+    // Computes the initial layout for the first layer with GraphViz
+    computeInitialLayoutMinimal: function(G){
+        var dotFormat = this.convertToDotMinimal(G);
+        var nodes = G.N;
+        //// Creates layout with
+        //// graph scalefactor width height
+        //// node name x y xsize ysize label style shape color fillcolor
+        //// where x and y are the center of the node
+        var dotLayout = Viz(dotFormat, { format: 'plain' }).split('\n');
+        for(var i in dotLayout){
+            var line = dotLayout[i].split(' ');
+            if(line[0] === 'node')
+                nodes[line[1]].layout = {
+                    x: nodes[line[1]].t,
+                    y: parseFloat(line[3]),
+                    w: parseFloat(line[5])*this.wScale
+                };
+        }
+        
+        //~ Adjust w for all other nodes as well
+        for(var nodeLabel in nodes){
+            var node = nodes[nodeLabel];
+            // with the correct level...
+            if(node.l > 0){
+                node.layout.w *= this.wScale
+            }
+        }
+
+    },
+
+    // Makes backup of the layout, since we can switch it between different methods (external, internal)
+    makeLayoutBackup: function(G){
+        var nodes = G.N;
+        for (var nodeLabel in nodes) {
+            var node = nodes[nodeLabel];
+            node.layoutbackup = Object.assign({}, node.layout);
+        }
+    },
+    
+    // Restores backup of the layout
+    restoreLayoutBackup: function(G){
+        var nodes = G.N;
+        for (var nodeLabel in nodes) {
+            var node = nodes[nodeLabel];
+            node.layout = Object.assign({}, node.layoutbackup);
+        }
+    },
+    
     // Computes for each node the slot positions for its children
     computeSlots: function(G){
         // Get sorted list of all levels
@@ -197,7 +339,7 @@ var NestedGraphLib = {
     },
 
     // Draws G via D3 by first computing the edge width (if necessary), then compute the initial layout, compute the slots, and finally draw each layer from bottom to top.
-    drawNestedGraph: function(G, containerID){
+    drawNestedGraph: function(G, containerID, bForceNewLayout){
         var i;
         // If first node does not have width property compute topological size
         for(i in G.N){
@@ -206,8 +348,69 @@ var NestedGraphLib = {
             break;
         }
 
-        // Compute initial layout
-        this.computeInitialLayout(G);
+        // Backup precious external layout?
+        for(i in G.N){
+            if (G.N[i].hasOwnProperty('layout')) {
+                if (!G.N[i].hasOwnProperty('layoutbackup')) {
+                    //~ Make a backup
+                    this.makeLayoutBackup(G);
+                }
+            }
+            break;
+        }
+
+        // If first node does not have a layout, then we compute it ourselves, or if we are forced to
+        for(i in G.N){
+            if (G.N[i].hasOwnProperty('layoutbackup') && !bForceNewLayout) {
+                //~ Restore backup
+                this.restoreLayoutBackup(G);
+                //~ Compute initial layout for the first layer
+                this.computeInitialLayoutMinimal(G);
+
+                // Function to sort nodes according to their initial layout
+                var sortFunction = function(a,b){
+                    return G.N[a].layout.y - G.N[b].layout.y;
+                };
+
+                var sortFunctionBackup = function(a,b){
+                    return G.N[a].layoutbackup.y - G.N[b].layoutbackup.y;
+                };
+
+                // Get all nodes in the first layer per timestep
+                for (var timeStep in G.EN){
+                    var nodesPerTimeStep = [];
+                    for(var nodeLabel in G.N){
+                        var node = G.N[nodeLabel];
+                        if (node.l == 0 && node.t == timeStep){
+                            nodesPerTimeStep.push(nodeLabel);
+                        }
+                    }
+
+                    var nodesPerTimeStepBackup = Array.from(nodesPerTimeStep).sort(sortFunctionBackup);
+                    nodesPerTimeStep = nodesPerTimeStep.sort(sortFunction);
+
+                    //console.log(timeStep);
+                    //console.log(nodesPerTimeStepBackup.toString());
+                    //console.log(nodesPerTimeStep.toString());
+
+                    for (var i = 0; i < nodesPerTimeStepBackup.length; i++){
+                        if (nodesPerTimeStepBackup[i] != nodesPerTimeStep[i]){
+                            window.alert("Order not equal to the provided one.");
+                            console.error("Order not equal to the provided one.");
+                            break;
+                        }
+                    }
+                }
+
+
+            }
+
+             else {
+                //~ Compute initial layout for all layers - classic mode
+                this.computeInitialLayout(G);
+            }
+            break;
+        }
 
         var container = document.getElementById(containerID);
 
